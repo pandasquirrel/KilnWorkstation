@@ -1,0 +1,102 @@
+name: vendor-sync
+
+# Daily upstream mirror + conflict/overlap detection. Never merges into main
+# automatically: it refreshes a PR (clean case) or files a conflict issue.
+
+on:
+  schedule:
+    # UTC 18:30 daily = Beijing 02:30 next day
+    - cron: '30 18 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  workflows: write
+
+env:
+  UPSTREAM_URL: https://github.com/stablyai/orca.git
+
+concurrency:
+  group: vendor-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "vendor-sync[bot]"
+          git config user.email "vendor-sync[bot]@users.noreply.github.com"
+
+      - name: Mirror upstream
+        run: |
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch upstream --tags --prune
+          LATEST_STABLE=$(git tag --list 'v[0-9]*' --sort=-v:refname \
+            | grep -vE 'rc|alpha|beta' | head -1)
+          # Local refs the report script diffs against...
+          git branch -f vendor/upstream upstream/main
+          git branch -f vendor/stable "$LATEST_STABLE"
+          # ...then pure mirrors on the remote: forced, never carry custom work.
+          git push origin vendor/upstream vendor/stable --force
+          echo "LATEST_STABLE=$LATEST_STABLE" >> "$GITHUB_ENV"
+
+      - name: Ensure vendor-conflict label exists
+        run: gh label create vendor-conflict \
+          --color B45252 --description "Upstream absorb conflicts reported by vendor-sync" 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect conflicts and overlap
+        id: report
+        run: bash scripts/vendor/sync-report.sh
+
+      - name: Refresh absorb pull request (clean case)
+        if: steps.report.outputs.has_conflicts == 'false'
+        run: |
+          # Upstream fully contained in main: nothing to absorb.
+          if git merge-base --is-ancestor vendor/upstream main; then
+            echo "upstream already fully absorbed"
+            PR=$(gh pr list --head vendor/sync-latest --state open \
+              --json number --jq '.[0].number' 2>/dev/null || true)
+            [ -n "$PR" ] && gh pr close "$PR"
+            exit 0
+          fi
+          git checkout -B vendor/sync-latest main
+          git merge --no-edit vendor/upstream
+          git push origin vendor/sync-latest --force
+          if gh pr view vendor/sync-latest >/dev/null 2>&1; then
+            gh pr edit vendor/sync-latest --body-file .vendor-report.md
+          else
+            gh pr create --base main --head vendor/sync-latest \
+              --title "vendor: absorb upstream through ${LATEST_STABLE}" \
+              --body-file .vendor-report.md
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Raise conflict issue
+        if: steps.report.outputs.has_conflicts == 'true'
+        run: |
+          gh issue list --label vendor-conflict --state open --json number \
+            --jq '.[].number' | xargs -r gh issue close -c "superseded by a new report"
+          gh issue create --label vendor-conflict \
+            --title "vendor: conflicts with upstream $(git rev-parse --short vendor/upstream)" \
+            --body-file .vendor-report.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vendor-report
+          path: .vendor-report.md
+          retention-days: 30

@@ -1,10 +1,15 @@
-# Product source remains owned by its normal reviewers; localization inputs need focused review.
-/src/renderer/src/i18n/locales/ @brennanb2025
-/config/scripts/*localization*.mjs @brennanb2025
-/config/scripts/*locale*.mjs @brennanb2025
-/config/i18next.config.ts @brennanb2025
+# Fork CODEOWNERS — intentionally replaces upstream's (their reviewer handles
+# do not exist in this repository); changes to this file are an expected
+# recurring conflict during absorb, resolved in favor of this file.
 
-# The relay's deploy and operate surface: workspace, workflows, and the rollout lease action.
-/cloud/ @Jinwoo-H
-/.github/workflows/cloud-*.yml @Jinwoo-H
-/.github/actions/cloud-sql-rollout-lease/ @Jinwoo-H
+# Vendoring infrastructure: require review on the tracking machinery itself.
+/.github/workflows/vendor-sync.yml          @pandasquirrel
+/.github/workflows/vendor-ci.yml            @pandasquirrel
+/scripts/vendor/                            @pandasquirrel
+
+# Branding / deep-change hotspots. Every absorb PR that touches these files
+# requests review, which is where semantic overlap actually gets checked.
+/config/electron-builder.config.cjs         @pandasquirrel
+/src/main/updater/                          @pandasquirrel
+/src/renderer/src/app-shell/                @pandasquirrel
+/src/renderer/src/components/right-sidebar/ @pandasquirrel

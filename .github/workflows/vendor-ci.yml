@@ -1,0 +1,59 @@
+name: vendor-ci
+
+# Gate for absorb PRs: type system catches most upstream refactors, changed
+# tests cover behavior. Full suite runs on main after each absorb.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vendor-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.14.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tc
+      - run: pnpm run check:code-quality:changed
+      - name: Changed-area tests
+        run: |
+          BASE=$(git merge-base origin/main HEAD)
+          DIRS=$(git diff --name-only "$BASE" HEAD | grep -P '\.test\.ts$' |
+            xargs -r -n1 dirname | sort -u | head -30 | tr '\n' ' ')
+          if [ -n "$DIRS" ]; then pnpm test $DIRS; else echo "no test files in diff"; fi
+
+  full-test:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.14.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
