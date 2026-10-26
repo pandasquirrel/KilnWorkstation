@@ -103,17 +103,15 @@ jobs:
       - name: Raise conflict issue
         if: steps.report.outputs.has_conflicts == 'true'
         run: |
-          set +e
-          echo "labels visible to GITHUB_TOKEN:"
-          gh api "repos/$GITHUB_REPOSITORY/labels" --jq '.[].name' || true
           TITLE="vendor: conflicts with upstream $(git rev-parse --short vendor/upstream)"
-          # Create/update the issue WITHOUT labels first: gh's name resolver
-          # fails to see the label even when REST does, aborting issue create.
-          ISSUE=$(gh api "repos/$GITHUB_REPOSITORY/issues" \
-            --jq '.[] | select(.title | startswith("vendor: conflicts")) | .number' \
-            -F state=open -F per_page=20 2>/dev/null | head -1)
           JSON=$(jq -n --arg t "$TITLE" --rawfile body .vendor-report.md \
             '{title:$t, body:$body}')
+          # Query string in the URL: -F would silently switch gh api to POST.
+          # /issues includes PRs; keep only real issues.
+          ISSUE=$(gh api "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=30" \
+            --jq '[.[] | select(.pull_request | not)
+                   | select(.title | startswith("vendor: conflicts"))
+                   | .number][0] // empty')
           if [ -n "$ISSUE" ]; then
             URL=$(printf '%s' "$JSON" | gh api -X PATCH \
               "repos/$GITHUB_REPOSITORY/issues/$ISSUE" --input - --jq '.html_url')
@@ -121,10 +119,8 @@ jobs:
             URL=$(printf '%s' "$JSON" | gh api -X POST \
               "repos/$GITHUB_REPOSITORY/issues" --input - --jq '.html_url')
           fi
-          NUM=${URL##*/}
-          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$NUM/labels" \
-            -f labels[]=vendor-conflict --jq '.name' || \
-            echo "::warning::label attach failed, issue $NUM is fine without it"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/${URL##*/}/labels" \
+            -f labels[]=vendor-conflict --jq '[.[].name] | join(",")'
           echo "conflict issue: $URL"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
