@@ -8,6 +8,10 @@ on:
     branches: [main]
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scripts/vendor/**'
   workflow_dispatch: {}
 
 permissions:
