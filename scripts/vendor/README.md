@@ -23,6 +23,19 @@
 
 手动触发：`gh workflow run vendor-sync.yml -R pandasquirrel/orcaZero`
 
+### 必需 secret：`VENDOR_SYNC_TOKEN`
+
+GitHub Actions 自带的 GITHUB_TOKEN 无权推送含 `.github/workflows/` 变更的
+引用，而镜像分支包含完整上游树。需要一把 fine-grained PAT 存入仓库 secret：
+
+- Repository access：仅 `pandasquirrel/orcaZero`
+- Permissions：Contents **Read and write**、Workflows **Read and write**、
+  Metadata Read-only（自动附带）
+- 建议设过期时间并在日历上标注轮换
+
+写入：仓库 Settings → Secrets and variables → Actions → New repository secret，
+名称 `VENDOR_SYNC_TOKEN`。
+
 ## 每周吸收流程
 
 1. 打开 absorb PR，阅读第 2 节「语义重叠」文件清单（文本能合并 ≠ 行为兼容）。

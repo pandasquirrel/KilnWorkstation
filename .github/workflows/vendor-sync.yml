@@ -31,9 +31,20 @@ jobs:
           fetch-depth: 0
 
       - name: Configure git
+        env:
+          # GITHUB_TOKEN cannot push refs that contain .github/workflows/
+          # changes; the mirror branches carry the whole upstream tree, so
+          # pushes need a PAT (fine-grained: Contents + Workflows write).
+          VENDOR_SYNC_TOKEN: ${{ secrets.VENDOR_SYNC_TOKEN }}
         run: |
           git config user.name "vendor-sync[bot]"
           git config user.email "vendor-sync[bot]@users.noreply.github.com"
+          if [ -z "$VENDOR_SYNC_TOKEN" ]; then
+            echo "::error::secret VENDOR_SYNC_TOKEN is missing (Settings → Secrets → Actions)"
+            exit 1
+          fi
+          git remote set-url origin \
+            "https://x-access-token:${VENDOR_SYNC_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
       - name: Mirror upstream
         run: |
