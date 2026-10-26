@@ -17,7 +17,10 @@ else
   # First output line is the tree OID; remaining lines mix paths with
   # "Auto-merging"/"CONFLICT" messages — keep only real tracked paths.
   CONFLICT_FILES=$(printf '%s\n' "$out" | tail -n +2 | while IFS= read -r p; do
-    [ -n "$p" ] && git cat-file -e "vendor/upstream:$p" 2>/dev/null && printf '%s\n' "$p"
+    if [ -n "$p" ] && { git cat-file -e "vendor/upstream:$p" 2>/dev/null \
+                        || git cat-file -e "HEAD:$p" 2>/dev/null; }; then
+      printf '%s\n' "$p"
+    fi
   done | sort -u)
 fi
 
