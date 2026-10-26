@@ -19,17 +19,23 @@
 - 无冲突：刷新 PR `vendor: absorb upstream through <tag>`，正文是
   `.vendor-report.md`（未吸收提交数、双方同改文件清单及相关定制提交）。
 - 有文本冲突：不开 PR，改为创建带 `vendor-conflict` 标签的 issue。
-- PR 门禁：`vendor-ci` 跑 `pnpm tc`、变更检查、变更区测试；main 推送后跑
-  4 分片全量测试（单 runner 跑不完，单片 60 分钟上限）。
+- PR 门禁：`vendor-ci` 跑 `pnpm tc`、变更检查、变更区测试；main 推送后
+  跑两条测试通道（单 runner 跑不完，单片 60 分钟上限）：
+  - `full-test`：4 分片常规单测，`ORCA_BALANCE_UNIT_SHARDS=1`
+    （沿用上游 `UNIT_EXCLUDE`：不含跨版本、live-PTY、electron 探针测试），
+    使用 `scripts/vendor/vitest-fork-unit.config.ts` 追加排除两个审计
+    上游 workflow 清单的测试（fork 里这些 workflow 已被替换）
+  - `cross-version-test`：2 分片跨版本兼容测试，独立 runner
 
-全量测试的环境依赖（缺了会一片红，但不是回归）：
+测试环境依赖（缺了会一片红，但不是回归）：
 
 - Bun（`config/.bun-version` 锁定）：部分测试直接 spawn `bun`
+- 磁盘：跨版本测试会物化多份完整发布树，job 先删除 runner 自带的
+  Android/Go/dotnet/Docker 等无用工具链（约 20GB）
 - 上游历史 refs：`cross-version-wire` 测试要解析已发布 tag/SHA，
   job 会 `git fetch upstream --tags`
-- electron 包二进制：`install-electron-package-binary.mjs`
-- 个别真实 shell/竞态测试在 GitHub 标准 runner 上可能不稳定（上游用
-  定制 Blacksmith runner）；若持续只红这类用例，按 runner 差异对待。
+- live-PTY、electron 探针等测试不跑：上游用定制 Blacksmith runner 与
+  打包 job 串行执行，标准 GitHub runner 环境不满足；如需可手动 dispatch。
 
 手动触发：`gh workflow run vendor-sync.yml -R pandasquirrel/orcaZero`
 
