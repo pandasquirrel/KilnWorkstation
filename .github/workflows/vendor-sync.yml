@@ -102,23 +102,22 @@ jobs:
       - name: Raise conflict issue
         if: steps.report.outputs.has_conflicts == 'true'
         run: |
-          ISSUE=$(gh issue list --label vendor-conflict --state open \
-            --json number --jq '.[0].number // empty')
+          set -x
+          gh api user --jq '.login + " token-scopes-ok"'
+          gh api "repos/$GITHUB_REPOSITORY/labels" --jq 'length'
+          TITLE="vendor: conflicts with upstream $(git rev-parse --short vendor/upstream)"
+          BODY=$(cat .vendor-report.md)
+          ISSUE=$(gh api "repos/$GITHUB_REPOSITORY/issues" \
+            --jq '.[0].number // empty' \
+            -F state=open -f labels=vendor-conflict 2>/dev/null || true)
           if [ -n "$ISSUE" ]; then
-            gh issue edit "$ISSUE" --body-file .vendor-report.md
-            exit 0
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/$ISSUE" \
+              -f title="$TITLE" -f body="$BODY" --jq '.html_url'
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues" \
+              -f title="$TITLE" -f body="$BODY" -f labels[]=vendor-conflict \
+              --jq '.html_url'
           fi
-          # Retry: a label created seconds ago may not yet resolve everywhere.
-          for attempt in 1 2 3; do
-            if gh issue create --label vendor-conflict \
-              --title "vendor: conflicts with upstream $(git rev-parse --short vendor/upstream)" \
-              --body-file .vendor-report.md; then
-              exit 0
-            fi
-            echo "issue create attempt $attempt failed, waiting 10s"
-            sleep 10
-          done
-          exit 1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
