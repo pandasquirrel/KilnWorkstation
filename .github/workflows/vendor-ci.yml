@@ -42,9 +42,14 @@ jobs:
           if [ -n "$DIRS" ]; then pnpm test $DIRS; else echo "no test files in diff"; fi
 
   full-test:
+    # Full suite exceeds 90m single-runner; vitest sharding mirrors upstream.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -53,4 +58,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+      - run: pnpm run build:packages
+      - run: node config/scripts/ensure-native-runtime.mjs --runtime=node
+      - run: node config/scripts/run-vitest.mjs run --config config/vitest.config.ts --shard=${{ matrix.shard }}/4
