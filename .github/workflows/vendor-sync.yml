@@ -63,8 +63,11 @@ jobs:
           echo "LATEST_STABLE=$LATEST_STABLE" >> "$GITHUB_ENV"
 
       - name: Ensure vendor-conflict label exists
-        run: gh label create vendor-conflict \
-          --color B45252 --description "Upstream absorb conflicts reported by vendor-sync" 2>/dev/null || true
+        run: |
+          gh api -X POST "repos/$GITHUB_REPOSITORY/labels" \
+            -f name=vendor-conflict -f color=B45252 \
+            -f description="Upstream absorb conflicts reported by vendor-sync" 2>/dev/null \
+            || echo "vendor-conflict label already exists"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -99,11 +102,23 @@ jobs:
       - name: Raise conflict issue
         if: steps.report.outputs.has_conflicts == 'true'
         run: |
-          gh issue list --label vendor-conflict --state open --json number \
-            --jq '.[].number' | xargs -r gh issue close -c "superseded by a new report"
-          gh issue create --label vendor-conflict \
-            --title "vendor: conflicts with upstream $(git rev-parse --short vendor/upstream)" \
-            --body-file .vendor-report.md
+          ISSUE=$(gh issue list --label vendor-conflict --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$ISSUE" ]; then
+            gh issue edit "$ISSUE" --body-file .vendor-report.md
+            exit 0
+          fi
+          # Retry: a label created seconds ago may not yet resolve everywhere.
+          for attempt in 1 2 3; do
+            if gh issue create --label vendor-conflict \
+              --title "vendor: conflicts with upstream $(git rev-parse --short vendor/upstream)" \
+              --body-file .vendor-report.md; then
+              exit 0
+            fi
+            echo "issue create attempt $attempt failed, waiting 10s"
+            sleep 10
+          done
+          exit 1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -112,4 +127,5 @@ jobs:
         with:
           name: vendor-report
           path: .vendor-report.md
+          include-hidden-files: true
           retention-days: 30
