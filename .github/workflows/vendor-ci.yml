@@ -27,6 +27,9 @@ jobs:
           fetch-depth: 0
       # No version input: package.json "packageManager" pins pnpm (with hash).
       - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: config/.bun-version
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -52,12 +55,24 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: config/.bun-version
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
+      # cross-version-wire tests resolve historical tags/SHAs from the object db.
+      - name: Fetch upstream release refs
+        run: |
+          git remote add upstream https://github.com/stablyai/orca.git
+          git fetch upstream --tags --prune \
+            "+refs/heads/main:refs/remotes/upstream/main"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build:packages
       - run: node config/scripts/ensure-native-runtime.mjs --runtime=node
+      - run: node config/scripts/install-electron-package-binary.mjs
       - run: node config/scripts/run-vitest.mjs run --config config/vitest.config.ts --shard=${{ matrix.shard }}/4
