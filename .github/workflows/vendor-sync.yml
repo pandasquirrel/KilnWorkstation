@@ -64,11 +64,11 @@ jobs:
 
       - name: Ensure vendor-conflict label exists
         run: |
-          gh api -X POST "repos/$GITHUB_REPOSITORY/labels" \
-            -f name=vendor-conflict -f color=B45252 \
-            -f description="Upstream absorb conflicts reported by vendor-sync" \
-            --jq '.name' \
-          || echo "label pre-exists or token lacks label write (non-fatal)"
+          gh api "repos/$GITHUB_REPOSITORY/labels/vendor-conflict" >/dev/null 2>&1 \
+          || gh api -X POST "repos/$GITHUB_REPOSITORY/labels" \
+               -f name=vendor-conflict -f color=B45252 \
+               -f description="Upstream absorb conflicts reported by vendor-sync" \
+               --jq '.name'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -79,9 +79,20 @@ jobs:
       - name: Refresh absorb pull request (clean case)
         if: steps.report.outputs.has_conflicts == 'false'
         run: |
+          close_stale_conflicts() {
+            local issues
+            issues=$(gh api \
+              "repos/$GITHUB_REPOSITORY/issues?state=open&labels=vendor-conflict" \
+              --jq '.[] | select(.pull_request | not) | .number')
+            if [ -n "$issues" ]; then
+              echo "$issues" | xargs -r gh issue close -c \
+                "merge with vendor/upstream is clean in the latest report"
+            fi
+          }
           # Upstream fully contained in main: nothing to absorb.
           if git merge-base --is-ancestor vendor/upstream main; then
             echo "upstream already fully absorbed"
+            close_stale_conflicts
             PR=$(gh pr list --head vendor/sync-latest --state open \
               --json number --jq '.[0].number' 2>/dev/null || true)
             [ -n "$PR" ] && gh pr close "$PR"
@@ -90,13 +101,16 @@ jobs:
           git checkout -B vendor/sync-latest main
           git merge --no-edit vendor/upstream
           git push origin vendor/sync-latest --force
-          if gh pr view vendor/sync-latest >/dev/null 2>&1; then
-            gh pr edit vendor/sync-latest --body-file .vendor-report.md
+          PR=$(gh pr list --head vendor/sync-latest --state open \
+            --json number --jq '.[0].number' 2>/dev/null || true)
+          if [ -n "$PR" ]; then
+            gh pr edit "$PR" --body-file .vendor-report.md
           else
             gh pr create --base main --head vendor/sync-latest \
               --title "vendor: absorb upstream through ${LATEST_STABLE}" \
               --body-file .vendor-report.md
           fi
+          close_stale_conflicts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
