@@ -13,7 +13,6 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-  workflows: write
 
 env:
   UPSTREAM_URL: https://github.com/stablyai/orca.git
