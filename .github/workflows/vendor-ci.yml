@@ -61,6 +61,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Hosted runners keep ~14GB free; full history + node_modules + the
+      # release trees materialized by cross-version tests exhaust it (ENOSPC
+      # cascades into store/window.api failures). Drop unused toolchains.
+      - name: Free disk space
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/local/lib/android /usr/local/.ghcup \
+            /opt/hostedtoolcache/CodeQL /opt/hostedtoolcache/go 2>/dev/null || true
+          sudo docker image prune --all --force 2>/dev/null || true
+          df -h / | tail -1
       - uses: pnpm/action-setup@v4
       - uses: oven-sh/setup-bun@v2
         with:
