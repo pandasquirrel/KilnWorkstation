@@ -43,6 +43,9 @@ jobs:
             echo "::error::secret VENDOR_SYNC_TOKEN is missing (Settings → Secrets → Actions)"
             exit 1
           fi
+          # checkout@v4 persists GITHUB_TOKEN as an Authorization extraheader
+          # that overrides URL-embedded credentials; unset it so pushes use PAT.
+          git config --unset-all http.https://github.com/.extraheader || true
           git remote set-url origin \
             "https://x-access-token:${VENDOR_SYNC_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
