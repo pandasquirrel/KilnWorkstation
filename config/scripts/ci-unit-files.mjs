@@ -48,7 +48,14 @@ export const UNIT_EXCLUDE = [
   'src/main/browser/browser-popup-adapter-compatibility.electron.test.ts',
   'src/main/browser/browser-popup-native-compatibility.electron.test.ts',
   'src/main/browser/browser-popup-background-compatibility.electron.test.ts',
-  `${CROSS_VERSION_WIRE_DIR}**`
+  `${CROSS_VERSION_WIRE_DIR}**`,
+  // FORK: audit stablyai's own workflow inventory, which orcaZero replaces.
+  'config/scripts/ci-pr-concurrency-keys.test.mjs',
+  'config/scripts/ci-draft-pr-admission.test.mjs',
+  'config/scripts/dependency-security-release.test.mjs',
+  // FORK: asserts node-gyp is absent from PATH (upstream pins custom runner
+  // images); GitHub-hosted images ship it, so the premise fails there.
+  'config/scripts/ensure-native-runtime.test.mjs'
 ]
 
 export function discoverUnitFiles(root = process.cwd()) {

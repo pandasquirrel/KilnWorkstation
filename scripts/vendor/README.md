@@ -22,10 +22,13 @@
 - PR 门禁：`vendor-ci` 跑 `pnpm tc`、变更检查、变更区测试；main 推送后
   跑两条测试通道（单 runner 跑不完，单片 60 分钟上限）：
   - `full-test`：4 分片常规单测，`ORCA_BALANCE_UNIT_SHARDS=1`
-    （沿用上游 `UNIT_EXCLUDE`：不含跨版本、live-PTY、electron 探针测试），
-    使用 `scripts/vendor/vitest-fork-unit.config.ts` 追加排除两个审计
-    上游 workflow 清单的测试（fork 里这些 workflow 已被替换）
-  - `cross-version-test`：2 分片跨版本兼容测试，独立 runner
+    （沿用上游 `UNIT_EXCLUDE`：不含跨版本、live-PTY、electron 探针测试）；
+    fork 追加的排除项以 `// FORK:` 标注在
+    `config/scripts/ci-unit-files.mjs`（3 个审计上游 workflow 清单的测试 +
+    1 个依赖定制 runner 镜像前提的 node-gyp 断言），吸收上游时在此处解冲突
+  - `cross-version-test`：2 分片跨版本兼容测试，独立 runner；blob:none
+    部分克隆 + 用 Node 跑（不能用 run-vitest 的 bun 通道，物化的发布源码
+    依赖 `node:module` 的 stripTypeScriptTypes）
 
 测试环境依赖（缺了会一片红，但不是回归）：
 

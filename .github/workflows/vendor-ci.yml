@@ -61,8 +61,6 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Free disk space
         run: |
           df -h / | tail -1
@@ -87,7 +85,7 @@ jobs:
           ORCA_BALANCE_UNIT_SHARDS: '1'
         run: >
           node config/scripts/run-vitest.mjs run
-          --config scripts/vendor/vitest-fork-unit.config.ts
+          --config config/vitest.config.ts
           --shard=${{ matrix.shard }}/4
 
   # Separate lane: these tests resolve released tags and materialize release
@@ -101,9 +99,13 @@ jobs:
       matrix:
         shard: [1, 2]
     steps:
+      # blob:none like upstream pr.yml: commit graph + tags are required, but
+      # historical blobs are lazy-fetched on demand (the fork origin holds all
+      # objects and acts as the promisor), saving ~89% of the clone.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          filter: blob:none
       - name: Free disk space
         run: |
           df -h / | tail -1
@@ -120,17 +122,19 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - name: Fetch upstream release refs
+      - name: Fetch upstream release refs (commit graph only)
         run: |
           git remote add upstream https://github.com/stablyai/orca.git
-          git fetch upstream --tags --prune \
-            "+refs/heads/main:refs/remotes/upstream/main"
+          git -c protocol.version=2 fetch --filter=blob:none upstream \
+            --tags --prune "+refs/heads/main:refs/remotes/upstream/main"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build:packages
       - run: node config/scripts/ensure-native-runtime.mjs --runtime=node
+      # Node, not bun: the materialized release sources call stripTypeScriptTypes
+      # (node:module), which bun's shim lacks. Mirrors upstream's plain vitest call.
       - name: Cross-version shard ${{ matrix.shard }}/2
         run: >
-          node config/scripts/run-vitest.mjs run
+          pnpm exec vitest run
           --config config/vitest.config.ts
           tests/e2e/cross-version-wire
           --shard=${{ matrix.shard }}/2
