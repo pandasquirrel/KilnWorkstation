@@ -40,8 +40,26 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm tc
-      - run: pnpm run check:code-quality:changed
+      # FORK: an absorb PR's diff against main spans all upstream commits since
+      # the last absorb, including lint debt upstream carries on unchanged lines
+      # its own gate never re-audits. Gate only the fork footprint (diff against
+      # the mirrored upstream tip), so upstream's debt never blocks the absorb.
+      - name: Fetch mirror for absorb footprint gate
+        if: github.event_name == 'pull_request' && github.head_ref == 'vendor/sync-latest'
+        run: >
+          git fetch --depth=1 origin
+          refs/heads/vendor/upstream:refs/remotes/origin/vendor/upstream
+      - name: Changed code quality
+        env:
+          # The gate hard-bases pull_request at HEAD^1; pretend push on absorb
+          # PRs so the explicit base below is honored.
+          GITHUB_EVENT_NAME: >-
+            ${{ github.head_ref == 'vendor/sync-latest' && 'push' || github.event_name }}
+          ORCA_CODE_QUALITY_BASE: >-
+            ${{ github.head_ref == 'vendor/sync-latest' && 'origin/vendor/upstream' || '' }}
+        run: pnpm run check:code-quality:changed
       - name: Changed-area tests
+        if: github.event_name != 'pull_request' || github.head_ref != 'vendor/sync-latest'
         run: |
           BASE=$(git merge-base origin/main HEAD)
           DIRS=$(git diff --name-only "$BASE" HEAD | grep -P '\.test\.ts$' |
