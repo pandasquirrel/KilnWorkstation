@@ -1,3 +1,14 @@
+<!-- FORK:BRAND — identity block for the KilnWorkstation derivative; keep at top -->
+
+> **KilnWorkstation（窑工工作站）— 非官方个人衍生版**
+>
+> 本仓库是基于上游 **[stablyai/orca](https://github.com/stablyai/orca)** 的个人定制版本，每日自动跟踪上游更新并叠加自有改动。
+> 与 stablyai / Lovecast Inc.（Orca 官方）**没有任何关联、未获其背书或认可**；不要向上游反馈本版本的问题。
+> 上游代码遵循 MIT 协议（Copyright © 2026 Lovecast Inc.，原始 [LICENSE](./LICENSE) 版权声明完整保留）。
+> 官方版本请访问 [onOrca.dev](https://onorca.dev)。
+
+<!-- FORK:BRAND END -->
+
 <h1 align="center">
   <a href="https://onOrca.dev"><img src="resources/build/icon.png" alt="Orca" width="64" valign="middle" /></a> Orca
 </h1>
