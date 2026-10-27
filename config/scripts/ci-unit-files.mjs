@@ -53,6 +53,7 @@ export const UNIT_EXCLUDE = [
   'config/scripts/ci-pr-concurrency-keys.test.mjs',
   'config/scripts/ci-draft-pr-admission.test.mjs',
   'config/scripts/dependency-security-release.test.mjs',
+  'config/scripts/ci-unit-exclusion-coverage.test.mjs',
   // FORK: asserts node-gyp is absent from PATH (upstream pins custom runner
   // images); GitHub-hosted images ship it, so the premise fails there.
   'config/scripts/ensure-native-runtime.test.mjs'

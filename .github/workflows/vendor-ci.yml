@@ -89,15 +89,11 @@ jobs:
           --shard=${{ matrix.shard }}/4
 
   # Separate lane: these tests resolve released tags and materialize release
-  # checkouts, so they get their own runners and upstream refs.
+  # checkouts. Upstream runs the whole directory unsharded on one runner.
   cross-version-test:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
     steps:
       # blob:none like upstream pr.yml: commit graph + tags are required, but
       # historical blobs are lazy-fetched on demand (the fork origin holds all
@@ -132,9 +128,8 @@ jobs:
       - run: node config/scripts/ensure-native-runtime.mjs --runtime=node
       # Node, not bun: the materialized release sources call stripTypeScriptTypes
       # (node:module), which bun's shim lacks. Mirrors upstream's plain vitest call.
-      - name: Cross-version shard ${{ matrix.shard }}/2
+      - name: Old/new client and server compatibility journeys
         run: >
           pnpm exec vitest run
           --config config/vitest.config.ts
-          tests/e2e/cross-version-wire
-          --shard=${{ matrix.shard }}/2
+          tests/e2e/cross-version-wire/
