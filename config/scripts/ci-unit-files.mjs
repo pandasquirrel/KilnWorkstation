@@ -54,7 +54,7 @@ export const UNIT_EXCLUDE = [
   'src/main/browser/browser-popup-native-compatibility.electron.test.ts',
   'src/main/browser/browser-popup-background-compatibility.electron.test.ts',
   `${CROSS_VERSION_WIRE_DIR}**`,
-  // FORK: audit stablyai's own workflow inventory, which orcaZero replaces.
+  // FORK: audit stablyai's own workflow inventory, which KilnWorkstation replaces.
   'config/scripts/ci-pr-concurrency-keys.test.mjs',
   'config/scripts/ci-draft-pr-admission.test.mjs',
   'config/scripts/dependency-security-release.test.mjs',

@@ -6,37 +6,37 @@
 
 ## 名词速查（非工程背景也能懂）
 
-| 名词 | 大白话 |
-|---|---|
-| 仓库（repo） | 装着整个软件全部代码与历史的文件夹；本仓库是私人仓库 `pandasquirrel/orcaZero` |
-| Git | 管代码历史的"时光机"：记录每次改动，可回到任意旧版本 |
-| 提交（commit） | 一次存盘，带唯一编号（如 `067c6147643`）和说明；软件历史就是一长串存盘 |
-| 分支（branch） | 同一代码的平行世界；主线叫 `main`，开新分支实验不影响主线 |
-| tag | 给某个提交贴的"正式发布版 vX.Y.Z"贴纸 |
-| 上游 / fork | 上游 = 源头官方仓库 `stablyai/orca`；fork = 从它派生的本仓库 |
-| **PR** | "我改了一条分支，请检查后并入主线"的申请单；可看改动、讨论、跑自动检查、点按钮合并 |
-| merge（合并） | 把一条分支的改动并回主线；两边都改了同一行且写法不同 = **冲突**，需人裁决 |
-| rebase / squash | 两种改写历史的合并方式；本机制**故意不用**，只用 merge 保留原历史 |
-| keep-ours | 解冲突时"保留自己这版"；CODEOWNERS 的固定判法 |
-| issue（工单） | 仓库的意见箱；机器人用带 `vendor-conflict` 标签的 issue 报告冲突 |
-| CI | 推送后云端自动编译、跑测试的"机器人员工"；全绿才能合并 |
-| workflow（Actions） | 定义机器人定时任务的脚本，在 `.github/workflows/` |
-| 镜像分支 | 与上游内容完全一致、每日强制对齐的分支，只当"官方最新内容"的传真件 |
-| PAT | 机器人推代码用的密码钥匙（fine-grained token），有有效期，需定期换 |
-| typecheck | 不运行软件、只读代码查"零件接口是否对得上"的机器审查 |
-| rerere | Git 的"记住冲突判法"功能；CODEOWNERS 同处再冲突时自动套用 keep-ours |
-| 物化（materialize） | 跨版本测试把旧发布版的**完整源码树**下载到磁盘上当真实对端跑 |
-| footprint | 本地相对上游的改动总量；深改点统一标 `// FORK:`，目标只减不增 |
+| 名词                | 大白话                                                                                                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 仓库（repo）        | 装着整个软件全部代码与历史的文件夹；本仓库是公开仓库 `pandasquirrel/KilnWorkstation`（原 `orcaZero`，2026-10 改名） |
+| Git                 | 管代码历史的"时光机"：记录每次改动，可回到任意旧版本                                                                |
+| 提交（commit）      | 一次存盘，带唯一编号（如 `067c6147643`）和说明；软件历史就是一长串存盘                                              |
+| 分支（branch）      | 同一代码的平行世界；主线叫 `main`，开新分支实验不影响主线                                                           |
+| tag                 | 给某个提交贴的"正式发布版 vX.Y.Z"贴纸                                                                               |
+| 上游 / fork         | 上游 = 源头官方仓库 `stablyai/orca`；fork = 从它派生的本仓库                                                        |
+| **PR**              | "我改了一条分支，请检查后并入主线"的申请单；可看改动、讨论、跑自动检查、点按钮合并                                  |
+| merge（合并）       | 把一条分支的改动并回主线；两边都改了同一行且写法不同 = **冲突**，需人裁决                                           |
+| rebase / squash     | 两种改写历史的合并方式；本机制**故意不用**，只用 merge 保留原历史                                                   |
+| keep-ours           | 解冲突时"保留自己这版"；CODEOWNERS 的固定判法                                                                       |
+| issue（工单）       | 仓库的意见箱；机器人用带 `vendor-conflict` 标签的 issue 报告冲突                                                    |
+| CI                  | 推送后云端自动编译、跑测试的"机器人员工"；全绿才能合并                                                              |
+| workflow（Actions） | 定义机器人定时任务的脚本，在 `.github/workflows/`                                                                   |
+| 镜像分支            | 与上游内容完全一致、每日强制对齐的分支，只当"官方最新内容"的传真件                                                  |
+| PAT                 | 机器人推代码用的密码钥匙（fine-grained token），有有效期，需定期换                                                  |
+| typecheck           | 不运行软件、只读代码查"零件接口是否对得上"的机器审查                                                                |
+| rerere              | Git 的"记住冲突判法"功能；CODEOWNERS 同处再冲突时自动套用 keep-ours                                                 |
+| 物化（materialize） | 跨版本测试把旧发布版的**完整源码树**下载到磁盘上当真实对端跑                                                        |
+| footprint           | 本地相对上游的改动总量；深改点统一标 `// FORK:`，目标只减不增                                                       |
 
 ## 分支
 
-| 分支 | 写入者 | 说明 |
-|---|---|---|
-| `vendor/upstream` | 机器人 | 官方 main 纯镜像，force 快进，禁止承载定制 |
-| `vendor/stable` | 机器人 | 官方最新 stable tag 镜像，发布基线 |
-| `vendor/sync-latest` | 机器人 | 每日吸收 PR 的分支 |
-| `main` | 人（经 PR） | 集成分支，受保护，只允许 merge commit |
-| `vendor/init-backup` | — | 建仓时 GitHub 初始提交的备份 |
+| 分支                 | 写入者      | 说明                                       |
+| -------------------- | ----------- | ------------------------------------------ |
+| `vendor/upstream`    | 机器人      | 官方 main 纯镜像，force 快进，禁止承载定制 |
+| `vendor/stable`      | 机器人      | 官方最新 stable tag 镜像，发布基线         |
+| `vendor/sync-latest` | 机器人      | 每日吸收 PR 的分支                         |
+| `main`               | 人（经 PR） | 集成分支，受保护，只允许 merge commit      |
+| `vendor/init-backup` | —           | 建仓时 GitHub 初始提交的备份               |
 
 ## 自动化产物
 
@@ -71,14 +71,14 @@
 - live-PTY、electron 探针等测试不跑：上游用定制 Blacksmith runner 与
   打包 job 串行执行，标准 GitHub runner 环境不满足；如需可手动 dispatch。
 
-手动触发：`gh workflow run vendor-sync.yml -R pandasquirrel/orcaZero`
+手动触发：`gh workflow run vendor-sync.yml -R pandasquirrel/KilnWorkstation`
 
 ### 必需 secret：`VENDOR_SYNC_TOKEN`
 
 GitHub Actions 自带的 GITHUB_TOKEN 无权推送含 `.github/workflows/` 变更的
 引用，而镜像分支包含完整上游树。需要一把 fine-grained PAT 存入仓库 secret：
 
-- Repository access：仅 `pandasquirrel/orcaZero`
+- Repository access：仅 `pandasquirrel/KilnWorkstation`（改名前建的 token 仍有效，仓库 ID 不变）
 - Permissions：Contents **Read and write**、Workflows **Read and write**、
   Metadata Read-only（自动附带）
 - 建议设过期时间并在日历上标注轮换
