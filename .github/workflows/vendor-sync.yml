@@ -13,6 +13,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write
 
 env:
   UPSTREAM_URL: https://github.com/stablyai/orca.git
@@ -71,6 +72,24 @@ jobs:
                --jq '.name'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # FORK: absorbs re-introduce upstream workflow files, and new file names
+      # register as active workflows (push/PR/schedule noise, missing upstream
+      # secrets/runners). Only vendor-ci/vendor-sync may run here.
+      - name: Disable workflows carried in from upstream
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/workflows?per_page=100" \
+            --jq '.workflows[]
+              | select(.state == "active")
+              | select(.path | startswith(".github/workflows/"))
+              | .path | split("/") | last' \
+          | grep -vE '^vendor-(ci|sync)\.yml$' \
+          | while read -r workflow; do
+              echo "disabling $workflow"
+              gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/disable"
+            done
 
       - name: Detect conflicts and overlap
         id: report

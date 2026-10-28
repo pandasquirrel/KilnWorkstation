@@ -43,6 +43,9 @@
 - 无冲突：刷新 PR `vendor: absorb upstream through <tag>`，正文是
   `.vendor-report.md`（未吸收提交数、双方同改文件清单及相关定制提交）。
 - 有文本冲突：不开 PR，改为创建带 `vendor-conflict` 标签的 issue。
+- 每次运行自动禁用除 `vendor-ci.yml`/`vendor-sync.yml` 外所有 active
+  工作流：吸收会带入上游 `.github/workflows/`，新文件名默认 active
+  （push/PR/定时噪声，且缺上游 secret/runner）；旧名保持禁用状态。
 - PR 门禁：`vendor-ci` 跑 `pnpm tc`、变更检查、变更区测试。吸收 PR
   （head = `vendor/sync-latest`）有专门语义：变更检查的基线不是 main
   而是 `vendor/upstream` 镜像尖，即**只审 fork footprint**——否则上游
