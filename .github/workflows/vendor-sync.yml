@@ -84,9 +84,12 @@ jobs:
             issues=$(gh api \
               "repos/$GITHUB_REPOSITORY/issues?state=open&labels=vendor-conflict" \
               --jq '.[] | select(.pull_request | not) | .number')
+            # FORK: GITHUB_TOKEN may close but not comment (addComment is
+            # rejected on this integration); close silently via REST.
             if [ -n "$issues" ]; then
-              echo "$issues" | xargs -r gh issue close -c \
-                "merge with vendor/upstream is clean in the latest report"
+              echo "$issues" | xargs -r -n1 -I{} gh api -X PATCH \
+                "repos/$GITHUB_REPOSITORY/issues/{}" \
+                -f state=closed -f state_reason=completed
             fi
           }
           # FORK: absorb branches carry upstream's .github/workflows changes;
