@@ -89,30 +89,34 @@ jobs:
                 "merge with vendor/upstream is clean in the latest report"
             fi
           }
+          # FORK: absorb branches carry upstream's .github/workflows changes;
+          # GITHUB_TOKEN is barred from PR writes on such branches (and its
+          # PRs would not trigger CI), so PR operations use the PAT.
           # Upstream fully contained in main: nothing to absorb.
           if git merge-base --is-ancestor vendor/upstream main; then
             echo "upstream already fully absorbed"
             close_stale_conflicts
-            PR=$(gh pr list --head vendor/sync-latest --state open \
+            PR=$(GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr list --head vendor/sync-latest --state open \
               --json number --jq '.[0].number' 2>/dev/null || true)
-            [ -n "$PR" ] && gh pr close "$PR"
+            [ -n "$PR" ] && GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr close "$PR"
             exit 0
           fi
           git checkout -B vendor/sync-latest main
           git merge --no-edit vendor/upstream
           git push origin vendor/sync-latest --force
-          PR=$(gh pr list --head vendor/sync-latest --state open \
+          PR=$(GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr list --head vendor/sync-latest --state open \
             --json number --jq '.[0].number' 2>/dev/null || true)
           if [ -n "$PR" ]; then
-            gh pr edit "$PR" --body-file .vendor-report.md
+            GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr edit "$PR" --body-file .vendor-report.md
           else
-            gh pr create --base main --head vendor/sync-latest \
+            GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr create --base main --head vendor/sync-latest \
               --title "vendor: absorb upstream through ${LATEST_STABLE}" \
               --body-file .vendor-report.md
           fi
           close_stale_conflicts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VENDOR_SYNC_TOKEN: ${{ secrets.VENDOR_SYNC_TOKEN }}
 
       - name: Raise conflict issue
         if: steps.report.outputs.has_conflicts == 'true'

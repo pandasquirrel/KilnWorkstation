@@ -80,6 +80,8 @@ GitHub Actions 自带的 GITHUB_TOKEN 无权推送含 `.github/workflows/` 变�
 
 - Repository access：仅 `pandasquirrel/KilnWorkstation`（改名前建的 token 仍有效，仓库 ID 不变）
 - Permissions：Contents **Read and write**、Workflows **Read and write**、
+  Pull requests **Read and write**（吸收分支带上游 workflow 改动，
+  GITHUB_TOKEN 建/改这种 PR 会 403，且它建的 PR 不触发 CI）、
   Metadata Read-only（自动附带）
 - 建议设过期时间并在日历上标注轮换
 
