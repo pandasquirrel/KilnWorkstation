@@ -91,27 +91,37 @@ jobs:
           }
           # FORK: absorb branches carry upstream's .github/workflows changes;
           # GITHUB_TOKEN is barred from PR writes on such branches (and its
-          # PRs would not trigger CI), so PR operations use the PAT.
+          # PRs would not trigger CI), so PR operations use the PAT via REST
+          # (fine-grained PATs surface clearer errors on REST than GraphQL).
+          GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api user --jq '"PAT identity: " + .login'
+          GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api "repos/$GITHUB_REPOSITORY" \
+            --jq '"PAT repo perms: " + (.permissions | tostring)'
           # Upstream fully contained in main: nothing to absorb.
           if git merge-base --is-ancestor vendor/upstream main; then
             echo "upstream already fully absorbed"
             close_stale_conflicts
-            PR=$(GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr list --head vendor/sync-latest --state open \
-              --json number --jq '.[0].number' 2>/dev/null || true)
-            [ -n "$PR" ] && GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr close "$PR"
+            PR=$(GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api \
+              "repos/$GITHUB_REPOSITORY/pulls?state=open&head=${GITHUB_REPOSITORY_OWNER}:vendor/sync-latest" \
+              --jq '.[0].number // empty')
+            [ -n "$PR" ] && GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api -X PATCH \
+              "repos/$GITHUB_REPOSITORY/pulls/$PR" -f state=closed --jq '.state'
             exit 0
           fi
           git checkout -B vendor/sync-latest main
           git merge --no-edit vendor/upstream
           git push origin vendor/sync-latest --force
-          PR=$(GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr list --head vendor/sync-latest --state open \
-            --json number --jq '.[0].number' 2>/dev/null || true)
+          PR=$(GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api \
+            "repos/$GITHUB_REPOSITORY/pulls?state=open&head=${GITHUB_REPOSITORY_OWNER}:vendor/sync-latest" \
+            --jq '.[0].number // empty')
           if [ -n "$PR" ]; then
-            GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr edit "$PR" --body-file .vendor-report.md
+            GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api -X PATCH \
+              "repos/$GITHUB_REPOSITORY/pulls/$PR" -F body=@.vendor-report.md --jq '.number'
           else
-            GH_TOKEN="$VENDOR_SYNC_TOKEN" gh pr create --base main --head vendor/sync-latest \
-              --title "vendor: absorb upstream through ${LATEST_STABLE}" \
-              --body-file .vendor-report.md
+            GH_TOKEN="$VENDOR_SYNC_TOKEN" gh api -X POST \
+              "repos/$GITHUB_REPOSITORY/pulls" \
+              -f title="vendor: absorb upstream through ${LATEST_STABLE}" \
+              -f head=vendor/sync-latest -f base=main \
+              -F body=@.vendor-report.md --jq '"created PR #" + (.number|tostring)'
           fi
           close_stale_conflicts
         env:
