@@ -43,7 +43,12 @@
 - 无冲突：刷新 PR `vendor: absorb upstream through <tag>`，正文是
   `.vendor-report.md`（未吸收提交数、双方同改文件清单及相关定制提交）。
 - 有文本冲突：不开 PR，改为创建带 `vendor-conflict` 标签的 issue。
-- PR 门禁：`vendor-ci` 跑 `pnpm tc`、变更检查、变更区测试；main 推送后
+- PR 门禁：`vendor-ci` 跑 `pnpm tc`、变更检查、变更区测试。吸收 PR
+  （head = `vendor/sync-latest`）有专门语义：变更检查的基线不是 main
+  而是 `vendor/upstream` 镜像尖，即**只审 fork footprint**——否则上游
+  存量 lint 欠账（早于规则落地的行、需要单独 mobile 安装的类型告警）
+  会被整段吸收 diff 误判为"新增"而挡门；变更区测试在吸收 PR 上跳过，
+  回归由合并后的 main 全量通道负责。普通功能 PR 不受影响。main 推送后
   跑两条测试通道（单 runner 跑不完，单片 60 分钟上限）：
   - `full-test`：4 分片常规单测，`ORCA_BALANCE_UNIT_SHARDS=1`
     （沿用上游 `UNIT_EXCLUDE`：不含跨版本、live-PTY、electron 探针测试）；
