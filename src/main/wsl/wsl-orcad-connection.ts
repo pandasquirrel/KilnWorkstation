@@ -150,6 +150,19 @@ export class WslOrcadConnectionManager {
     this.dependencies.onChange?.(entry.connection.distro, null, { state: 'closed' })
   }
 
+  /**
+   * Ends the loopback listener but keeps the published status: once orcad idled out or the distro
+   * stopped, any dial to it would spawn wsl.exe and boot the distro again.
+   */
+  async retireListener(distro: string): Promise<void> {
+    const key = wslDistroHolderKey(distro)
+    const entry = this.active.get(key)
+    // A user connect in flight owns the next entry; retiring it would undo that connect.
+    if (entry && !this.inFlight.has(key)) {
+      await this.drop(key, entry)
+    }
+  }
+
   /** Retires one bridge; unlike close, a connect queued behind it still runs. */
   private async drop(key: string, entry: ActiveWslOrcadConnection): Promise<void> {
     if (this.active.get(key) === entry) {
@@ -177,7 +190,8 @@ export class WslOrcadConnectionManager {
     // Taken before any await, so a close during the running-list read still supersedes this.
     const generation = this.generation(key)
     const stillCurrent = (): boolean => this.generation(key) === generation
-    await assertWslDistroMayStart(distro, options.requireRunning, stillCurrent)
+    const requireRunning = options.requireRunning
+    await assertWslDistroMayStart(distro, requireRunning, stillCurrent)
     const environmentId = options.environmentId ?? defaultWslOrcadEnvironmentId(distro)
     const label = options.label ?? distro
     const target = { kind: 'wsl', id: environmentId, distro, label } as const
@@ -190,7 +204,8 @@ export class WslOrcadConnectionManager {
       pairedOffer: this.enrolledOffer(key, environmentId),
       signal: options.signal,
       holder: this.dependencies.holder,
-      createTransport: () => transport
+      createTransport: () => transport,
+      ...(requireRunning ? { requireRunning: () => requireRunning(distro) } : {})
     })
     if (launch.outcome === 'deferred') {
       throw new WslOrcadLaunchDeferredError(launch)
