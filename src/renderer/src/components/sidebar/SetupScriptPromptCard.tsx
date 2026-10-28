@@ -75,7 +75,7 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
       const hostId = getRepoExecutionHostId(repo)
       const inspection = await inspectSetupScriptPromptState({
         repo,
-        checkHooks: () => checkRuntimeHooks(hostId, repo.id),
+        checkHooks: () => checkRuntimeHooks(hostId, repo.id, { background: true }),
         inspectImports: () => inspectRuntimeSetupScriptImports(hostId, repo.id)
       })
       if (!cancelled) {
@@ -270,7 +270,7 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
                 ? skippedCount === 1
                   ? translate(
                       'auto.components.sidebar.SetupScriptPromptCard.savedWithSkippedFields_one',
-                      '1 unsupported field skipped. Saved the setup command.',
+                      '{{count}} unsupported field skipped. Saved the setup command.',
                       { count: skippedCount }
                     )
                   : translate(
