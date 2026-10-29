@@ -74,6 +74,20 @@
 - live-PTY、electron 探针等测试不跑：上游用定制 Blacksmith runner 与
   打包 job 串行执行，标准 GitHub runner 环境不满足；如需可手动 dispatch。
 
+## CI 排障
+
+- **吸收 PR 的 footprint 基线**：曾用 step 级 `env: GITHUB_EVENT_NAME: push`
+  去骗 `check-changed-code-quality.mjs`，但该覆盖**不会进入 node 子进程**，
+  门禁始终按 `HEAD^1` 算基线，把整段上游 diff（上千文件）当新增审。现行写法
+  在 shell 里算 SHA 后用 `env -u GITHUB_EVENT_NAME ORCA_CODE_QUALITY_BASE="$BASE"`
+  调用；排查时先看日志里 `absorb footprint base:` 是否为镜像尖。
+- **下载 runner 日志**：`gh api .../actions/jobs/<id>/logs` 输出到 stdout 会被
+  截断，改用
+  `curl -sSL -H "Authorization: Bearer $(gh auth token)" "https://api.github.com/repos/<owner>/<repo>/actions/jobs/<id>/logs" -o run.log`
+  （302 跳到 Azure Blob）。run 未结束时下载会 404，需等结束。
+- **定时任务会晚点**：`30 18 * * *` 常延迟 2–4 小时执行；上游没有新提交时
+  运行成功但不开 PR（走 already-absorbed 分支），不是故障。
+
 手动触发：`gh workflow run vendor-sync.yml -R pandasquirrel/KilnWorkstation`
 
 ### 必需 secret：`VENDOR_SYNC_TOKEN`
