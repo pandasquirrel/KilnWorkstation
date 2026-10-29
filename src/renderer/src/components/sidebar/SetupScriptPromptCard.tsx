@@ -9,7 +9,8 @@ import {
   formatCandidateSource,
   isSetupScriptPromptDismissed,
   ignoresSharedSetupScripts,
-  inspectSetupScriptPromptState
+  inspectSetupScriptPromptState,
+  isSilentSetupScriptPromptState
 } from '@/lib/setup-script-prompt'
 import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/runtime-hooks-client'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
@@ -27,11 +28,13 @@ import {
 import { useSetupScriptPromptRevalidation } from './useSetupScriptPromptRevalidation'
 import { useRenderedSetupScriptPromptState } from './useRenderedSetupScriptPromptState'
 import { translate } from '@/i18n/i18n'
+import { useUiLanguageRevision } from '@/i18n/use-ui-language-revision'
 import { getRepoHostIdentity } from '@/store/slices/repo-host-identity'
 import { getRepoExecutionHostId } from '../../../../shared/execution-host'
 import { useWorktreeById } from '@/store/selectors'
 
 function SetupScriptPromptCard(): React.JSX.Element | null {
+  useUiLanguageRevision()
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
   const repos = useAppStore((s) => s.repos)
   const activeRepoId = useAppStore((s) => s.activeRepoId)
@@ -376,13 +379,9 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
     promptTargetHidden ||
     !activeRepo ||
     !renderedPromptState ||
-    (renderedPromptState.status === 'ok' && renderedPromptState.hasEffectiveSetup)
+    (renderedPromptState.status === 'ok' && renderedPromptState.hasEffectiveSetup) ||
+    isSilentSetupScriptPromptState(renderedPromptState)
   ) {
-    return null
-  }
-
-  // Mobile-scope inspection is permanently forbidden; the global banner explains it, and retrying would probe on every focus.
-  if (renderedPromptState.status === 'forbidden') {
     return null
   }
 
