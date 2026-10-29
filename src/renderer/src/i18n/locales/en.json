@@ -19010,10 +19010,14 @@
       "TerminalContextMenu": {
         "copySessionId": "Copy Session ID",
         "copySessionIdSuccess": "Session ID copied",
-        "copySessionIdError": "Unable to copy session ID"
+        "copySessionIdError": "Unable to copy session ID",
+        "openSideConversation": "Open Side Conversation"
       },
       "hostFile": {
         "updateHostForOutsideFiles": "Update Orca on {{value0}} to open files outside its workspaces"
+      },
+      "sideConversation": {
+        "unsupported": "This pane has no agent conversation that can be forked."
       }
     },
     "settings": {

@@ -6,6 +6,7 @@ import {
   GitFork,
   Maximize2,
   MessageSquare,
+  MessageSquarePlus,
   Minimize2,
   PanelBottomClose,
   PanelsTopLeft,
@@ -61,6 +62,8 @@ type TerminalContextMenuProps = {
   onResetTerminal: () => void
   canContinueAgentSessionInNewSession: boolean
   onContinueAgentSessionInNewSession: () => void
+  canOpenSideConversation: boolean
+  onOpenSideConversation: () => void
   onForkAgentSession: () => void
   /** True when this pane may switch between the terminal and native chat views.
    *  Structured sessions are excluded — they have no terminal underneath. */
@@ -154,6 +157,8 @@ function TerminalContextMenuItems({
   onResetTerminal,
   canContinueAgentSessionInNewSession,
   onContinueAgentSessionInNewSession,
+  canOpenSideConversation,
+  onOpenSideConversation,
   onForkAgentSession,
   canToggleNativeChat,
   isNativeChatView,
@@ -222,6 +227,15 @@ function TerminalContextMenuItems({
       />
       {canContinueAgentSessionInNewSession ? (
         <AgentSessionContinuationMenuItem onSelect={onContinueAgentSessionInNewSession} />
+      ) : null}
+      {canOpenSideConversation ? (
+        <DropdownMenuItem onSelect={onOpenSideConversation}>
+          <MessageSquarePlus />
+          {translate(
+            'components.terminalPane.TerminalContextMenu.openSideConversation',
+            'Open Side Conversation'
+          )}
+        </DropdownMenuItem>
       ) : null}
       <DropdownMenuItem onSelect={onForkAgentSession}>
         <GitFork />

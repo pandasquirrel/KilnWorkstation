@@ -19,7 +19,8 @@ import {
 import {
   continueAgentSessionFromMenuPane,
   copyAgentSessionContextFromMenuPane,
-  forkAgentSessionFromMenuPane
+  forkAgentSessionFromMenuPane,
+  openSideConversationFromMenuPane
 } from './terminal-pane-menu-agent-session-actions'
 import { useTerminalPaneSplitActions } from './use-terminal-pane-split-actions'
 import { useTerminalContextMenuTrigger } from './use-terminal-context-menu-trigger'
@@ -75,6 +76,7 @@ type TerminalMenuState = {
   onForkAgentSession: () => Promise<void>
   onContinueAgentSessionInNewSession: () => void
   onCopyAgentSessionContext: () => Promise<void>
+  onOpenSideConversation: () => void
   onQuickCommand: (command: TerminalQuickCommand, historyId: string) => void
   onToggleExpand: () => void
   onSetTitle: () => void
@@ -174,10 +176,8 @@ export function useTerminalPaneContextMenu({
 
   const onSelectAll = (): void => {
     const pane = resolveMenuPane()
-    if (pane) {
-      pane.terminal.selectAll()
-      pane.terminal.focus()
-    }
+    pane?.terminal.selectAll()
+    pane?.terminal.focus()
   }
 
   const onCopyPaneId = async (): Promise<void> =>
@@ -320,6 +320,8 @@ export function useTerminalPaneContextMenu({
     onForkAgentSession,
     onContinueAgentSessionInNewSession,
     onCopyAgentSessionContext,
+    onOpenSideConversation: () =>
+      openSideConversationFromMenuPane(agentSessionContext, resolveMenuPane()),
     onQuickCommand,
     onToggleExpand,
     onSetTitle: handleSetTitle,
