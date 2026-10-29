@@ -8,7 +8,7 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 import ts from 'typescript-api'
 import { defaultExclude } from 'vitest/config'
-import { UNIT_EXCLUDE, UNIT_INCLUDE } from './ci-unit-files.mjs'
+import { FORK_UNIT_EXCLUDE, UNIT_EXCLUDE, UNIT_INCLUDE } from './ci-unit-files.mjs'
 
 const VITEST_DEFAULT_INCLUDE = '**/*.{test,spec}.?(c|m)[jt]s?(x)'
 
@@ -98,6 +98,11 @@ const NON_UNIT_TEST_RUNNERS = [
 ]
 
 const DEDICATED_UNIT_FILES = UNIT_EXCLUDE.filter((glob) => !defaultExclude.includes(glob))
+// FORK: fork-only exclusions have no upstream workflow row, so only the mirror
+// audit skips them; they still count as collected by the dedicated jobs above.
+const DEDICATED_UPSTREAM_FILES = DEDICATED_UNIT_FILES.filter(
+  (glob) => !FORK_UNIT_EXCLUDE.includes(glob)
+)
 
 export const TEST_RUNNERS = [
   { name: 'unit (config/vitest.config.ts)', include: UNIT_INCLUDE, exclude: UNIT_EXCLUDE },
@@ -108,7 +113,7 @@ export const TEST_RUNNERS = [
     // Those jobs run config/vitest.config.ts, so a file there still needs a UNIT_INCLUDE name.
     within: UNIT_INCLUDE,
     sources: ['.github/workflows/pr.yml', '.github/workflows/unit-tests.yml'],
-    mirrors: DEDICATED_UNIT_FILES.map((glob) => glob.replace(/\*\*$/, ''))
+    mirrors: DEDICATED_UPSTREAM_FILES.map((glob) => glob.replace(/\*\*$/, ''))
   },
   ...NON_UNIT_TEST_RUNNERS
 ]
