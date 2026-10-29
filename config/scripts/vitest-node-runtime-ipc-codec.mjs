@@ -25,5 +25,10 @@ export function encodeNodeRuntimeMessage(value) {
 }
 
 export function decodeNodeRuntimeMessage(text) {
+  // FORK: tests fake IPC with process.emit('message', obj); vitest's own
+  // listener receives those too, so non-devalue payloads must pass through.
+  if (typeof text !== 'string') {
+    return text
+  }
   return parse(text, revivers)
 }

@@ -21,6 +21,22 @@ export const UNIT_SETUP_FILES = [
   'config/scripts/vitest-caller-identity-env-setup.ts'
 ]
 
+// FORK: exclusions that only apply here. Upstream's workflow inventory never
+// names them, so the runner audit filters this list out instead of drifting.
+export const FORK_UNIT_EXCLUDE = [
+  // Audit stablyai's own workflow inventory, which KilnWorkstation replaces.
+  'config/scripts/ci-pr-concurrency-keys.test.mjs',
+  'config/scripts/ci-draft-pr-admission.test.mjs',
+  'config/scripts/dependency-security-release.test.mjs',
+  'config/scripts/ci-unit-exclusion-coverage.test.mjs',
+  // Assert node-gyp is absent from PATH; upstream pins custom runner images,
+  // and GitHub-hosted images ship it, so the premise fails there.
+  'config/scripts/ensure-native-runtime.test.mjs',
+  // Concurrent-create cases assert on mock call order, which flips on
+  // GitHub-hosted runners; re-include once upstream makes the ordering explicit.
+  'src/main/runtime/runtime-local-worktree-create.test.ts'
+]
+
 export const UNIT_EXCLUDE = [
   ...defaultExclude,
   'src/main/daemon/repro-13767-shell-ready-marker-lost-to-exec.test.ts',
@@ -60,14 +76,7 @@ export const UNIT_EXCLUDE = [
   'src/main/browser/extensions/browser-extension-toolbar.electron.test.ts',
   'src/main/browser/extensions/browser-extension-native-messaging.electron.test.ts',
   `${CROSS_VERSION_WIRE_DIR}**`,
-  // FORK: audit stablyai's own workflow inventory, which KilnWorkstation replaces.
-  'config/scripts/ci-pr-concurrency-keys.test.mjs',
-  'config/scripts/ci-draft-pr-admission.test.mjs',
-  'config/scripts/dependency-security-release.test.mjs',
-  'config/scripts/ci-unit-exclusion-coverage.test.mjs',
-  // FORK: asserts node-gyp is absent from PATH (upstream pins custom runner
-  // images); GitHub-hosted images ship it, so the premise fails there.
-  'config/scripts/ensure-native-runtime.test.mjs'
+  ...FORK_UNIT_EXCLUDE
 ]
 
 export function discoverUnitFiles(root = process.cwd()) {
