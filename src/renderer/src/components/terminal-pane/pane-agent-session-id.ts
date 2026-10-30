@@ -11,6 +11,7 @@ export type PaneAgentSessionIdState = {
   paneForegroundAgentByPaneKey: Record<string, PaneForegroundAgentEntry | undefined>
 }
 
+// FORK: the side-conversation fork needs the agent beside the session; id-only callers keep resolvePaneAgentSessionId.
 export type PaneAgentSession = {
   agent: string | undefined
   providerSession: AgentProviderSessionMetadata
