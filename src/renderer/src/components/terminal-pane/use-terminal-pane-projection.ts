@@ -183,6 +183,7 @@ export function useTerminalPaneProjection(controller: TerminalPaneMobileControll
           contextMenu.open && contextMenuLeafId
             ? resolvePaneAgentSessionId(state, makePaneKey(tabId, contextMenuLeafId))
             : null,
+        // FORK: side-conversation menu gate rides the existing menu subscription.
         contextMenuCanOpenSideConversation:
           contextMenu.open && contextMenuLeafId
             ? canOpenSideConversation(state, tabId, contextMenuLeafId)
