@@ -6,6 +6,7 @@ import {
   type PreparedAgentSessionFork
 } from './terminal-agent-session-fork'
 import { prepareAgentSessionContinuationFromPane } from './terminal-agent-session-continuation'
+import { openSideConversationFromPane } from './terminal-pane-side-conversation'
 import type { AgentSessionContinuationRequest } from '@/lib/agent-session-continuation'
 
 export type TerminalPaneMenuAgentSessionContext = {
@@ -55,6 +56,15 @@ export const continueAgentSessionFromMenuPane = (
 }
 
 // Copy standalone bounded context without fork framing or opening the fork dialog (#5020).
+export const openSideConversationFromMenuPane = (
+  context: Pick<TerminalPaneMenuAgentSessionContext, 'tabId' | 'worktreeId'>,
+  pane: ManagedPane | null
+): void => {
+  if (pane) {
+    openSideConversationFromPane({ pane, tabId: context.tabId, worktreeId: context.worktreeId })
+  }
+}
+
 export const copyAgentSessionContextFromMenuPane = async (
   pane: ManagedPane | null
 ): Promise<void> => {

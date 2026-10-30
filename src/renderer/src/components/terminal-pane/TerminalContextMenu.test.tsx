@@ -82,6 +82,8 @@ function renderMenu(overrides: Record<string, unknown> = {}): string {
     onResetTerminal: vi.fn(),
     canContinueAgentSessionInNewSession: false,
     onContinueAgentSessionInNewSession: vi.fn(),
+    canOpenSideConversation: false,
+    onOpenSideConversation: vi.fn(),
     onForkAgentSession: vi.fn(),
     canToggleNativeChat: false,
     isNativeChatView: false,
@@ -172,6 +174,24 @@ describe('TerminalContextMenu', () => {
 
     handoffItem?.onSelect?.()
     expect(onContinueAgentSessionInNewSession).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers a side conversation only when the pane conversation can be forked', () => {
+    const onOpenSideConversation = vi.fn()
+    renderMenu({ canOpenSideConversation: true, onOpenSideConversation })
+
+    const sideItem = items.list.find(
+      (item) => childrenText(item.children) === 'Open Side Conversation'
+    )
+    expect(sideItem).toBeDefined()
+    sideItem?.onSelect?.()
+    expect(onOpenSideConversation).toHaveBeenCalledTimes(1)
+
+    items.list = []
+    renderMenu()
+    expect(
+      items.list.some((item) => childrenText(item.children) === 'Open Side Conversation')
+    ).toBe(false)
   })
 
   it('hides chat continuation when the pane cannot switch views', () => {

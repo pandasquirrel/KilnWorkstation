@@ -51,6 +51,7 @@ export function TerminalPaneSurface({
     closeTerminalLinkActions,
     contextMenu,
     contextMenuCanContinueInNewSession,
+    contextMenuCanOpenSideConversation,
     contextMenuCanToggleChat,
     contextMenuIsChatView,
     cwd,
@@ -287,6 +288,8 @@ export function TerminalPaneSurface({
         onResetTerminal={contextMenu.onResetTerminal}
         canContinueAgentSessionInNewSession={contextMenuCanContinueInNewSession}
         onContinueAgentSessionInNewSession={contextMenu.onContinueAgentSessionInNewSession}
+        canOpenSideConversation={contextMenuCanOpenSideConversation}
+        onOpenSideConversation={contextMenu.onOpenSideConversation}
         onForkAgentSession={() => void contextMenu.onForkAgentSession()}
         canToggleNativeChat={contextMenuCanToggleChat}
         isNativeChatView={contextMenuIsChatView}
