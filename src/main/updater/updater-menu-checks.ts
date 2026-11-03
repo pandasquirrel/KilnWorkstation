@@ -1,5 +1,6 @@
 import { app } from 'electron'
 import { isMacInstallRequested } from '../updater-mac-install'
+import { FORK_UPSTREAM_UPDATES_ENABLED } from '../../shared/fork-updates'
 import type { UpdateCheckOptions } from '../../shared/update-status-types'
 import type { ReleaseChannel } from '../../shared/release-channel'
 import { UpdaterScheduling } from './updater-scheduling'
@@ -19,6 +20,12 @@ export abstract class UpdaterMenuChecks extends UpdaterScheduling {
     }
     if (options?.localBuild) {
       void this.checkForLocalBuildFromMenu()
+      return
+    }
+    // FORK: release/pinned/channel checks all resolve upstream Orca builds; report the manual
+    // check as settled until Kiln ships its own feed. Local-build checks stay for dev tooling.
+    if (!FORK_UPSTREAM_UPDATES_ENABLED) {
+      this.sendStatus({ state: 'not-available', userInitiated: true })
       return
     }
     if (options?.targetTag && options.channel) {

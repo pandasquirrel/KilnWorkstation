@@ -204,6 +204,10 @@ export function configureDevUserDataPath(isDev: boolean): void {
   }
 
   if (!isDev) {
+    // FORK: package.json keeps the upstream name ("orca"), so Electron would derive userData and
+    // the single-instance lock from it and share both with a stock Orca install — launching Orca
+    // while Kiln runs focused Kiln's window. Pin the fork's own root; see src/shared/fork-brand.ts.
+    app.setPath('userData', join(app.getPath('appData'), 'Kiln'))
     return
   }
   const overrideUserDataPath = process.env.ORCA_DEV_USER_DATA_PATH

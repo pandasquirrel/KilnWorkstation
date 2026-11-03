@@ -743,8 +743,11 @@ module.exports = {
   npmRebuild: true,
   publish: {
     provider: 'github',
-    owner: 'stablyai',
-    repo: devChannelRepo ?? 'orca',
+    // FORK: Kiln has no release channel yet. Point packaging metadata at the fork so an updater
+    // sample can never resolve official Orca builds; switch this back to the release repository
+    // once Kiln ships signed releases (see src/shared/fork-updates.ts).
+    owner: 'pandasquirrel',
+    repo: 'KilnWorkstation',
     // Keep main-repo releases draft until release-cut verifies all assets; early --publish always would expose missing Windows installers.
     releaseType: devChannelRepo ? 'prerelease' : 'draft'
   }

@@ -178,6 +178,21 @@ describe('configureDevUserDataPath', () => {
     expect(app.setPath).toHaveBeenCalledWith('userData', e2eRoot)
   })
 
+  it('pins packaged userData to the fork root instead of the shared upstream name', async () => {
+    const { app } = await import('electron')
+    const { configureDevUserDataPath } = await import('./configure-process')
+    const originalE2EUserDataDir = process.env.ORCA_E2E_USER_DATA_DIR
+    delete process.env.ORCA_E2E_USER_DATA_DIR
+    try {
+      configureDevUserDataPath(false)
+    } finally {
+      restoreEnv('ORCA_E2E_USER_DATA_DIR', originalE2EUserDataDir)
+    }
+
+    // package.json name is still "orca"; without this the single-instance lock and profile are shared.
+    expect(app.setPath).toHaveBeenCalledWith('userData', join(app.getPath('appData'), 'Kiln'))
+  })
+
   it('rejects an E2E launch whose Node home escaped the disposable profile', async () => {
     const { configureDevUserDataPath } = await import('./configure-process')
     const originalE2EUserDataDir = process.env.ORCA_E2E_USER_DATA_DIR
