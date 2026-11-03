@@ -28,6 +28,7 @@ const WORKTREE_HANDLER_CHANNELS = [
   'worktrees:listKnownForExecutionHost',
   'worktrees:forgetRemovedForExecutionHost',
   'worktrees:cancelListDetected',
+  'worktrees:scanStartingWslDistro',
   'worktrees:create',
   'worktrees:adoptProvisionedRoot',
   'worktrees:prefetchCreateBase',
@@ -121,13 +122,13 @@ vi.mock('../terminal-history-deletion', async () =>
 vi.mock('../ports/advertised-url-watcher', async () =>
   (await import('./worktrees-test-module-mocks')).advertisedUrlWatcherModuleMock()
 )
-vi.mock('../workspace-cleanup-scan-snapshot', async () =>
+vi.mock('../workspaces/cleanup/workspace-cleanup-scan-snapshot', async () =>
   (await import('./worktrees-test-module-mocks')).workspaceCleanupScanSnapshotModuleMock()
 )
-vi.mock('../workspace-space-analysis-snapshot', async () =>
+vi.mock('../workspaces/space-analysis/workspace-space-analysis-snapshot', async () =>
   (await import('./worktrees-test-module-mocks')).workspaceSpaceAnalysisSnapshotModuleMock()
 )
-vi.mock('../workspace-cleanup-removal-snapshot-prune', async () =>
+vi.mock('../workspaces/cleanup/workspace-cleanup-removal-snapshot-prune', async () =>
   (await import('./worktrees-test-module-mocks')).workspaceCleanupRemovalSnapshotPruneModuleMock()
 )
 vi.mock('../runtime/worktree-teardown', async () =>

@@ -24,11 +24,7 @@ export function encodeNodeRuntimeMessage(value) {
   return stringify(value, reducers)
 }
 
+// Why pass non-strings through: tests that fake a parent with process.emit('message') reach this listener too.
 export function decodeNodeRuntimeMessage(text) {
-  // FORK: tests fake IPC with process.emit('message', obj); vitest's own
-  // listener receives those too, so non-devalue payloads must pass through.
-  if (typeof text !== 'string') {
-    return text
-  }
-  return parse(text, revivers)
+  return typeof text === 'string' ? parse(text, revivers) : text
 }
