@@ -8,5 +8,6 @@ export function macDaemonJobLabel(
   protocolVersion = PROTOCOL_VERSION
 ): string {
   const profileKey = createHash('sha256').update(resolve(userDataPath)).digest('hex').slice(0, 16)
-  return `com.stablyai.orca.terminal.${profileKey}.v${protocolVersion}`
+  // FORK: launchd labels belong to the fork identity so Kiln and a stock Orca install stay isolated.
+  return `com.kilnworkstation.kiln.terminal.${profileKey}.v${protocolVersion}`
 }

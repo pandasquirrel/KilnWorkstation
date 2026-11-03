@@ -1,9 +1,10 @@
 import { nativeImage, type NativeImage } from 'electron'
 
-// Five-pixel DEV text fits the empty glyph area without widening the production 14pt status item.
+// Five-pixel DEV text under the glyph; the square beaver mark leaves no empty side column.
 const DEV_BADGE_ROWS = ['##..###.#.#', '#.#.#...#.#', '#.#.##..#.#', '#.#.#...#.#', '##..###..#.']
 const BADGE_OFFSET_X = 0
-const BADGE_OFFSET_Y = 3
+// FORK: the fork tray glyph is a 16pt beaver centered in a 22pt canvas, so the badge sits in the strip below it.
+const BADGE_OFFSET_Y = 17
 // Clear an antialias margin so the tail does not turn DEV into DEU.
 const BADGE_CLEAR_MARGIN = 1
 

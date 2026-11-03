@@ -1,3 +1,4 @@
+// FORK: tray labels and tooltips use the fork's product name (Kiln).
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as SystemTrayModule from './system-tray'
 
@@ -200,7 +201,7 @@ describe('createSystemTray', () => {
 
     expect(trayInstances).toHaveLength(1)
     expect(trayInstances[0].image).toBe(resizedImage)
-    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Orca')
+    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Kiln')
     expect(builtMenuItems().map((item) => item.label)).toEqual(['Open Orca', undefined, 'Quit'])
     const clickHandler = trayInstances[0].on.mock.calls.find((call) => call[0] === 'click')?.[1]
     expect(clickHandler).toBeTypeOf('function')
@@ -318,9 +319,9 @@ describe('dev instance indicator', () => {
     expect(devBadgeImage.setTemplateImage).toHaveBeenCalledWith(true)
     expect(trayInstances[0].image).toBe(devBadgeImage)
     expect(trayInstances[0].setTitle).not.toHaveBeenCalled()
-    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Orca DEV (my-branch)')
+    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Kiln DEV (my-branch)')
     expect(builtMenuItems()[0]).toMatchObject({
-      label: 'Orca DEV (my-branch)',
+      label: 'Kiln DEV (my-branch)',
       enabled: false
     })
   })
@@ -358,8 +359,8 @@ describe('dev instance indicator', () => {
 
     createSystemTray(createOptions({ isDevInstance: true }))
 
-    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Orca DEV')
-    expect(builtMenuItems()[0]).toMatchObject({ label: 'Orca DEV', enabled: false })
+    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Kiln DEV')
+    expect(builtMenuItems()[0]).toMatchObject({ label: 'Kiln DEV', enabled: false })
   })
 
   it('keeps the DEV marker in the tooltip across the attention toggle', async () => {
@@ -371,10 +372,10 @@ describe('dev instance indicator', () => {
 
     setTrayAttention(true)
     flushTraySceneMutation()
-    expect(created.setToolTip).toHaveBeenCalledWith('Orca DEV (my-branch) - activity waiting')
+    expect(created.setToolTip).toHaveBeenCalledWith('Kiln DEV (my-branch) - activity waiting')
     setTrayAttention(false)
     flushTraySceneMutation()
-    expect(created.setToolTip).toHaveBeenLastCalledWith('Orca DEV (my-branch)')
+    expect(created.setToolTip).toHaveBeenLastCalledWith('Kiln DEV (my-branch)')
   })
 
   it('marks the Windows tooltip without badging the icon', async () => {
@@ -383,9 +384,9 @@ describe('dev instance indicator', () => {
 
     createSystemTray(createOptions({ isDevInstance: true, devInstanceLabel: 'my-branch' }))
 
-    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Orca DEV (my-branch)')
+    expect(trayInstances[0].setToolTip).toHaveBeenCalledWith('Kiln DEV (my-branch)')
     expect(stampDevBadgeMock).not.toHaveBeenCalled()
-    expect(builtMenuItems()[0]).toMatchObject({ label: 'Orca DEV (my-branch)', enabled: false })
+    expect(builtMenuItems()[0]).toMatchObject({ label: 'Kiln DEV (my-branch)', enabled: false })
   })
 
   it('adds no DEV marker for production instances', async () => {
@@ -460,7 +461,7 @@ describe('setTrayAttention', () => {
     flushTraySceneMutation()
     expect(baseMacImage.setTemplateImage).toHaveBeenLastCalledWith(true)
     expect(created.setImage).toHaveBeenLastCalledWith(baseMacImage)
-    expect(created.setToolTip).toHaveBeenLastCalledWith('Orca')
+    expect(created.setToolTip).toHaveBeenLastCalledWith('Kiln')
   })
 
   it('recomposes active macOS attention when the system appearance changes', async () => {
@@ -625,7 +626,7 @@ describe('macOS hardening', () => {
     setTrayAttention(true)
     expect(() => flushTraySceneMutation()).not.toThrow()
     expect(created.setImage).toHaveBeenLastCalledWith(baseMacImage)
-    expect(created.setToolTip).toHaveBeenLastCalledWith('Orca')
+    expect(created.setToolTip).toHaveBeenLastCalledWith('Kiln')
     expect(warn).toHaveBeenCalledWith(
       '[system-tray] macOS attention icon failed; showing plain icon',
       expect.any(Error)
@@ -702,15 +703,15 @@ describe('language changes', () => {
     rebuildSystemTrayMenu()
     flushTraySceneMutation()
     expect(trayInstances[0].setToolTip).toHaveBeenLastCalledWith(
-      'Orca DEV (language-test) - 件のアクティビティが待機中'
+      'Kiln DEV (language-test) - 件のアクティビティが待機中'
     )
-    expect(builtMenuItems()[0].label).toBe('Orca DEV (language-test)')
+    expect(builtMenuItems()[0].label).toBe('Kiln DEV (language-test)')
     expect(composeAttentionMock).toHaveBeenCalled()
 
-    mainI18n.addResource('ja', 'translation', 'tray.openOrca', 'Orca を表示')
+    mainI18n.addResource('ja', 'translation', 'tray.openOrca', 'Kiln を表示')
     rebuildSystemTrayMenu()
     flushTraySceneMutation()
-    expect(builtMenuItems()[2].label).toBe('Orca を表示')
+    expect(builtMenuItems()[2].label).toBe('Kiln を表示')
   })
 
   it('does nothing without a tray or when destroyed before the deferred refresh', async () => {

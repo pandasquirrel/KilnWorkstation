@@ -14,7 +14,7 @@ const REAL_PROMPT_LINE =
 
 // Derived fixture: an agent accesses files while Orca is held responsible (#9756).
 const ORCA_APPDATA_LINE =
-  '2026-07-27 15:40:02.001 Df tccd[79149:c81551c] [com.apple.TCC:access] AUTHREQ_PROMPTING: msgID=80871.99, service=kTCCServiceSystemPolicyAppData, subject=Sub:{node-5555494487fbc7467d473fd8b0a397018cbf954b}Resp:{TCCDProcess: identifier=com.stablyai.orca, pid=47548, auid=501, euid=501, binary_path=/opt/homebrew/Cellar/node/26.5.0/bin/node},'
+  '2026-07-27 15:40:02.001 Df tccd[79149:c81551c] [com.apple.TCC:access] AUTHREQ_PROMPTING: msgID=80871.99, service=kTCCServiceSystemPolicyAppData, subject=Sub:{node-5555494487fbc7467d473fd8b0a397018cbf954b}Resp:{TCCDProcess: identifier=com.kilnworkstation.kiln, pid=47548, auid=501, euid=501, binary_path=/opt/homebrew/Cellar/node/26.5.0/bin/node},'
 
 // Preflight checks dominate the TCC subsystem and must never count as a dialog.
 const PREFLIGHT_LINE =
@@ -32,7 +32,7 @@ describe('parseTccPromptEvent', () => {
 
   it('separates the accessing binary from the responsible app', () => {
     const event = parseTccPromptEvent(ORCA_APPDATA_LINE)
-    expect(event?.responsibleIdentifier).toBe('com.stablyai.orca')
+    expect(event?.responsibleIdentifier).toBe('com.kilnworkstation.kiln')
     expect(event?.accessingIdentifier).toBe('node-5555494487fbc7467d473fd8b0a397018cbf954b')
     expect(event?.binaryPath).toBe('/opt/homebrew/Cellar/node/26.5.0/bin/node')
   })
@@ -46,14 +46,15 @@ describe('parseTccPromptEvent', () => {
 })
 
 describe('isOrcaAttributedPrompt', () => {
-  it('accepts the app and detached terminal helper across Orca build identities', () => {
+  // FORK: the fork watches its own bundle identities.
+  it('accepts the app and detached terminal helper across Kiln build identities', () => {
     for (const id of [
-      'com.stablyai.orca',
-      'com.stablyai.orca.helper',
-      'com.stablyai.orca.dev',
-      'com.stablyai.orca.dev.helper',
-      'com.stablyai.orca.local',
-      'com.stablyai.orca.local.helper'
+      'com.kilnworkstation.kiln',
+      'com.kilnworkstation.kiln.helper',
+      'com.kilnworkstation.kiln.dev',
+      'com.kilnworkstation.kiln.dev.helper',
+      'com.kilnworkstation.kiln.local',
+      'com.kilnworkstation.kiln.local.helper'
     ]) {
       expect(
         isOrcaAttributedPrompt({
@@ -80,7 +81,7 @@ describe('isOrcaAttributedPrompt', () => {
       isOrcaAttributedPrompt({
         service: 'kTCCServiceMicrophone',
         accessingIdentifier: 'orca',
-        responsibleIdentifier: 'com.stablyai.orca'
+        responsibleIdentifier: 'com.kilnworkstation.kiln'
       })
     ).toBe(false)
   })
@@ -151,7 +152,7 @@ describe('MacosTccPromptWatch', () => {
     expect(onPrompt).toHaveBeenCalledTimes(1)
     expect(onPrompt.mock.calls[0][0]).toMatchObject({
       service: 'kTCCServiceSystemPolicyAppData',
-      responsibleIdentifier: 'com.stablyai.orca'
+      responsibleIdentifier: 'com.kilnworkstation.kiln'
     })
     watch.stop()
   })

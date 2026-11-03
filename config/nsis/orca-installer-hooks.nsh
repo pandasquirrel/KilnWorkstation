@@ -94,8 +94,9 @@
     Pop $0
     ; Give the OS a moment to release the image lock before removing the tree.
     Sleep 500
-    RMDir /r "$LOCALAPPDATA\Orca\daemon-host"
-    RMDir /r "$LOCALAPPDATA\Orca\daemon-host-profiles"
+    ; FORK: the fork's daemon host lives under its own root; never remove a stock Orca install's copy.
+    RMDir /r "$LOCALAPPDATA\Kiln\daemon-host"
+    RMDir /r "$LOCALAPPDATA\Kiln\daemon-host-profiles"
   ${endIf}
   ; customInstall rewrites associations on every update, so remove them during uninstallOldVersion too.
   DeleteRegKey SHELL_CONTEXT "Software\Classes\${MARKDOWN_PROGID}"

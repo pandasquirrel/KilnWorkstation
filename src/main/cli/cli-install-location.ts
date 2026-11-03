@@ -215,7 +215,8 @@ export abstract class CliInstallLocation {
         return join(this.homePath, '.local', 'bin', DEV_COMMAND_NAME)
       }
       if (this.platform === 'win32') {
-        return join(this.localAppDataPath, 'Programs', 'Orca Dev', 'bin', `${DEV_COMMAND_NAME}.cmd`)
+        // FORK: dev installs land under the fork's app folder name.
+        return join(this.localAppDataPath, 'Programs', 'Kiln Dev', 'bin', `${DEV_COMMAND_NAME}.cmd`)
       }
     }
 

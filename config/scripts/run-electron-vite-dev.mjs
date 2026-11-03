@@ -155,7 +155,7 @@ function sanitizeMacAppBundleName(value) {
       .join('')
       .replace(/\s+/g, ' ')
       .trim()
-      .slice(0, 120) || 'Orca'
+      .slice(0, 120) || 'Kiln' // FORK: dev bundle fallback name.
   )
 }
 

@@ -1,10 +1,11 @@
 // Keep all signed Info.plist values branch-invariant: ad-hoc cdhash is the Keychain ACL identity, so branch drift re-prompts for passwords.
 // Branch Dock names belong in the unsigned .app directory name.
 
-export const DEV_BUNDLE_ID = 'com.stablyai.orca.dev'
+// FORK: fork brand identity for the dev bundle.
+export const DEV_BUNDLE_ID = 'com.kilnworkstation.kiln.dev'
 export const DEV_HELPER_BUNDLE_ID = `${DEV_BUNDLE_ID}.helper`
 // Fixed display name distinguishes dev notifications from other Electron apps without branch-specific signature drift.
-export const DEV_BUNDLE_DISPLAY_NAME = 'Orca Dev'
+export const DEV_BUNDLE_DISPLAY_NAME = 'Kiln Dev'
 
 /** Info.plist patches for the app bundle. Values must not vary per branch — see above. */
 export function getDevBundlePlistPatches() {

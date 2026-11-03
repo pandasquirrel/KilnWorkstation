@@ -55,7 +55,8 @@ export function getSpeechModelCacheDirCandidates(
     .digest('hex')
     .slice(0, WINDOWS_SAFE_CACHE_HASH_LENGTH)
   const candidates = getWindowsAsciiSharedDataRoots()
-    .map((root) => join(root, 'Orca', 'speech-models', requestedModelsDirHash))
+    // FORK: shared model caches use the fork's root so they never mix with a stock Orca install.
+    .map((root) => join(root, 'Kiln', 'speech-models', requestedModelsDirHash))
     .filter((modelsDir) => !hasNonAsciiCharacters(modelsDir))
     .map((modelsDir) => ({ modelsDir, migrationSourceDir: requestedModelsDir }))
 

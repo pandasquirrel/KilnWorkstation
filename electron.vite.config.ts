@@ -313,6 +313,15 @@ export const electronViteConfig: UserConfig = {
   }
 }
 
-export default defineConfig(({ command }) =>
-  command === 'serve' ? createDevServeConfig(electronViteConfig) : electronViteConfig
-)
+export default defineConfig(({ command, mode }) => {
+  // FORK: vitest and Playwright builds assert upstream brand text, so the runtime rename is
+  // compiled out there. See src/shared/fork-brand.ts.
+  const brandRenameDisabled = { KILN_BRAND_RENAME_DISABLED: JSON.stringify(mode === 'e2e') }
+  const config = command === 'serve' ? createDevServeConfig(electronViteConfig) : electronViteConfig
+  config.main = { ...config.main, define: { ...config.main?.define, ...brandRenameDisabled } }
+  config.renderer = {
+    ...config.renderer,
+    define: { ...config.renderer?.define, ...brandRenameDisabled }
+  }
+  return config
+})

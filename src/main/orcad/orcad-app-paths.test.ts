@@ -27,16 +27,17 @@ afterEach(() => {
 })
 
 describe('resolveUserDataPath', () => {
-  it('prefers ORCA_USER_DATA, then XDG_DATA_HOME, then ~/.orca', () => {
+  // FORK: the fallback roots carry the fork's name; the env vars keep their upstream names.
+  it('prefers ORCA_USER_DATA, then XDG_DATA_HOME, then ~/.kiln', () => {
     vi.stubEnv('ORCA_USER_DATA', join(sep, 'srv', 'orca-state'))
     vi.stubEnv('XDG_DATA_HOME', join(sep, 'xdg'))
     expect(resolveUserDataPath()).toBe(join(sep, 'srv', 'orca-state'))
 
     vi.stubEnv('ORCA_USER_DATA', '')
-    expect(resolveUserDataPath()).toBe(join(sep, 'xdg', 'Orca'))
+    expect(resolveUserDataPath()).toBe(join(sep, 'xdg', 'Kiln'))
 
     vi.stubEnv('XDG_DATA_HOME', '')
-    expect(resolveUserDataPath()).toBe(join(homedir(), '.orca'))
+    expect(resolveUserDataPath()).toBe(join(homedir(), '.kiln'))
   })
 })
 

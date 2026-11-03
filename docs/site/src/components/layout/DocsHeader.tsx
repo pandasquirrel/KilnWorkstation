@@ -33,15 +33,15 @@ export async function DocsHeader() {
         <div className="flex shrink-0 items-center gap-6">
           <Link
             href="/docs"
-            aria-label="Orca docs"
+            aria-label="Kiln docs"
             className="group flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
-            <Image src="/docs/logo.svg" alt="" width={40} height={25} />
+            <Image src="/docs/logo.svg" alt="" width={40} height={40} />
             <span
               aria-hidden="true"
               className="font-sans text-sm font-semibold tracking-tight text-foreground"
             >
-              ORCA
+              KILN
             </span>
           </Link>
           <nav className="hidden items-center gap-5 sm:flex" aria-label="Primary navigation">

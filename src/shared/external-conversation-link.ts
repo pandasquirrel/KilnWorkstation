@@ -11,7 +11,8 @@ export const CONNECTOR_SOURCE_NAMES: Record<ConnectorSource, string> = {
   github: 'GitHub',
   linear: 'Linear',
   discord: 'Discord',
-  dev: 'Orca'
+  // FORK: the dev connector drives the fork, so its display name follows the product.
+  dev: 'Kiln'
 }
 
 /** Terminal agents a connector may start; see `CONNECTOR_AGENTS` for why only these. */

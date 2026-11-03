@@ -43,11 +43,12 @@ let devIndicator: { label: string | null } | null = null
 let nativeThemeUpdatedListener: (() => void) | null = null
 
 // Per-worktree tooltips distinguish concurrent dev instances.
+// FORK: tray text uses the fork's product name; `DEV` stays as the dev-build marker.
 function baseTooltip(): string {
   if (!devIndicator) {
-    return 'Orca'
+    return 'Kiln'
   }
-  return devIndicator.label ? `Orca DEV (${devIndicator.label})` : 'Orca DEV'
+  return devIndicator.label ? `Kiln DEV (${devIndicator.label})` : 'Kiln DEV'
 }
 
 // Downscale the app image for Windows' 16px notification-area slot.

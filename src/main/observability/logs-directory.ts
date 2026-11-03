@@ -9,13 +9,14 @@ function getUserDataDir(): string {
     return getAppEnvironment().getPath('userData')
   }
   const home = homedir()
+  // FORK: plain Node hosts must resolve to the same userData directory Electron uses for Kiln.
   if (platform() === 'darwin') {
-    return join(home, 'Library', 'Application Support', 'Orca')
+    return join(home, 'Library', 'Application Support', 'Kiln')
   }
   if (platform() === 'win32') {
-    return join(process.env.APPDATA ?? home, 'Orca')
+    return join(process.env.APPDATA ?? home, 'Kiln')
   }
-  return join(home, '.config', 'Orca')
+  return join(home, '.config', 'Kiln')
 }
 
 export function getLogsDirectory(): string {

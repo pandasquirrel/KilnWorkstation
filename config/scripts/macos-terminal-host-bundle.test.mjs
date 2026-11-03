@@ -43,8 +43,9 @@ describe('terminal host Info.plist', () => {
     expect(info).toMatchObject({
       ...usageDescriptions,
       CFBundleIdentifier: 'com.stablyai.orca',
-      CFBundleName: 'Orca',
-      CFBundleDisplayName: 'Orca',
+      // FORK: the helper carries the fork's product name.
+      CFBundleName: 'Kiln',
+      CFBundleDisplayName: 'Kiln',
       CFBundleExecutable: 'orca-terminal-host',
       CFBundleVersion: '0',
       LSMinimumSystemVersion: '13.5',

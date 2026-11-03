@@ -8,7 +8,8 @@ export async function initializeCodexAppServerConnection(
   await connection.request(
     'initialize',
     {
-      clientInfo: { name: 'orca_desktop', title: 'Orca', version: '0.0.0' },
+      // FORK: identify as the fork product to Codex; the internal name keeps its wire value.
+      clientInfo: { name: 'orca_desktop', title: 'Kiln', version: '0.0.0' },
       capabilities: {
         experimentalApi: true,
         requestAttestation: false,

@@ -11,15 +11,15 @@ export function DocsFooter() {
           <div>
             <Link
               href="/docs"
-              aria-label="Orca docs"
+              aria-label="Kiln docs"
               className="mb-4 inline-flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              <Image src="/docs/logo.svg" alt="" width={32} height={20} />
+              <Image src="/docs/logo.svg" alt="" width={32} height={32} />
               <span
                 aria-hidden="true"
                 className="font-sans text-xl font-bold tracking-tight text-foreground"
               >
-                ORCA
+                KILN
               </span>
             </Link>
             <p className="text-muted-foreground max-w-sm text-sm">

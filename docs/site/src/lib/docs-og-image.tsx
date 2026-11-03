@@ -27,7 +27,8 @@ function getSectionLabel(url: string): string {
 }
 
 function getFooterTag(title: string, section: string): string {
-  return `${title} - ${section} - Orca`
+  // FORK: docs site carries the fork's product name.
+  return `${title} - ${section} - Kiln`
 }
 
 function getTitleFontSize(title: string): number {
@@ -98,7 +99,8 @@ export async function createDocsOgImage({ title, url }: { title: string; url: st
             background: ogColors.secondary
           }}
         >
-          <img src={logoSrc} width={32} height={20} alt="" />
+          {/* oxlint-disable-next-line nextjs/no-img-element -- Satori renders this SVG, not next/image. */}
+          <img src={logoSrc} width={32} height={32} alt="" />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
