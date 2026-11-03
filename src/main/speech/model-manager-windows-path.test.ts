@@ -57,12 +57,14 @@ describe('ModelManager Windows model path handling', () => {
     restoreEnvironment()
   })
 
-  it('uses an ASCII cache path when the Windows default user data path has non-ASCII characters', () => {
+  // FORK: upstream removed this in the low-value-test cleanup; keep it because it
+  // pins the ASCII fallback to the fork's own root (state isolation from Orca).
+  it('uses an ASCII cache path under the fork root when the Windows user data path is non-ASCII', () => {
     const dir = mkdtempSync(join(tmpdir(), 'orca-model-manager-'))
     try {
       setPlatform('win32')
       const programDataDir = join(dir, 'ProgramData')
-      const userDataDir = join(dir, '用户', 'Orca')
+      const userDataDir = join(dir, '用户', 'Kiln')
       process.env.PROGRAMDATA = programDataDir
       appGetPathMock.mockImplementation((name: string) =>
         name === 'userData' ? userDataDir : join(dir, name)
@@ -71,7 +73,6 @@ describe('ModelManager Windows model path handling', () => {
       const manager = new ModelManager(undefined, openElectronSpeechDownloadRequest)
 
       expect(manager.getModelsDir()).not.toContain(userDataDir)
-      // FORK: the shared ASCII cache lives under the fork's root.
       expect(manager.getModelsDir()).toContain(join(programDataDir, 'Kiln', 'speech-models'))
       expect(isAsciiPath(manager.getModelsDir())).toBe(true)
       expect(existsSync(manager.getModelsDir())).toBe(true)

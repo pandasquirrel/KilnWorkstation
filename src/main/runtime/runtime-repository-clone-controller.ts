@@ -16,7 +16,7 @@ import { gitSpawnAfterWindowsEnvironmentReady, promptGuardGitEnv } from '../git/
 import { reuseSavedCloneTarget } from '../git/saved-clone-target'
 import { runWithGitReadCacheInvalidation } from '../git/status'
 import { invalidateAuthorizedRootsCache } from '../ipc/registered-worktree-roots-cache'
-import { detectRepoIconAndUpstream } from '../repo-icon-autodetect'
+import { detectRepoIconAndUpstream } from '../repository-icons/repo-icon-autodetect'
 import { getRepoName } from '../git/repo'
 import { prepareLocalWorktreeRootForRepo } from '../worktree-root-preparation'
 import type { RuntimeStore } from './runtime-store-contract'
@@ -113,6 +113,8 @@ export class RuntimeRepositoryCloneController {
         ['clone', '--progress', '--', trimmedUrl, clonePath],
         {
           cwd: trimmedDestination,
+          // Host Git on purpose: the clone makes a new repo no project owns, even inside one.
+          hostGit: true,
           admissionTier: 'interactive',
           env: promptGuardGitEnv(),
           stdio: ['ignore', 'ignore', 'pipe']

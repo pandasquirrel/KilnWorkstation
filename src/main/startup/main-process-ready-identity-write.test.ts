@@ -69,7 +69,7 @@ vi.mock('electron', () => ({
   }
 }))
 vi.mock('./main-process-state', () => ({ mainProcessState: mocks.state }))
-vi.mock('../persistence', () => ({
+vi.mock('../persistence/loading-store/store', () => ({
   Store: class {
     getSettings() {
       return {}
@@ -82,8 +82,7 @@ vi.mock('../persistence', () => ({
     getSshTargets() {
       return []
     }
-  },
-  getCanonicalUserDataPath: () => mocks.userDataPath
+  }
 }))
 vi.mock('../persistence/profile-state/profile-state-startup-authority', () => ({
   createProfileStateStoreForStartup: () => ({
@@ -154,7 +153,7 @@ vi.mock('../git/runner', () => ({
 vi.mock('../agent-hooks/wsl-hook-relay-manager', () => ({
   wslHookRelayManager: { setManagedHookSettingsResolver: vi.fn() }
 }))
-vi.mock('../app-icon', () => ({ applyAppIcon: vi.fn() }))
+vi.mock('../window/desktop-integration/app-icon', () => ({ applyAppIcon: vi.fn() }))
 vi.mock('./dev-education-suppression', () => ({
   shouldSuppressDevEducation: () => false,
   suppressDevEducationForStore: vi.fn()

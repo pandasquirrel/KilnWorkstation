@@ -16,6 +16,7 @@ const transport = vi.hoisted(
 
 vi.mock('react-native', () => ({
   ActivityIndicator: 'ActivityIndicator',
+  Animated: { View: 'View' },
   BackHandler: { addEventListener: () => ({ remove: () => {} }) },
   Image: 'Image',
   Platform: { OS: 'ios' },
@@ -31,7 +32,13 @@ vi.mock('react-native-safe-area-context', () => ({
   SafeAreaView: 'SafeAreaView',
   useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 })
 }))
-vi.mock('lucide-react-native', () => ({ ChevronLeft: 'Icon', Save: 'Icon' }))
+vi.mock('lucide-react-native', () => ({
+  ChevronLeft: 'Icon',
+  CircleAlert: 'Icon',
+  FileText: 'Icon',
+  Save: 'Icon',
+  WifiOff: 'Icon'
+}))
 vi.mock('../navigation/route-handoff', () => ({
   useRouteHandoff: () => ({ back: () => {}, canGoBack: () => false, push })
 }))
@@ -39,6 +46,7 @@ vi.mock('../components/ConfirmModal', () => ({ ConfirmModal: () => null }))
 vi.mock('./MobileFileMarkdownPreview', () => ({
   MobileFileMarkdownPreview: 'MobileFileMarkdownPreview'
 }))
+vi.mock('../components/MobileSourceCopyButton', () => ({ MobileSourceCopyButton: () => null }))
 vi.mock('./MobileFilePreviewSourceText', () => ({ MobileFilePreviewSourceText: () => null }))
 // No shell client initially: the screen must settle on waiting.
 vi.mock('../transport/host-client-hooks', () => ({
@@ -48,6 +56,7 @@ vi.mock('../transport/host-client-hooks', () => ({
 
 import { MobileFilePreviewScreen } from './MobileFilePreviewScreen'
 import { WorkspaceExecutionHostContext } from '../navigation/workspace-execution-host'
+import type { ExecutionHostId } from '../../../src/shared/execution-host'
 
 let tree: ReactTestRenderer | null = null
 
@@ -79,7 +88,7 @@ function retryButtons(rendered: ReactTestRenderer): ReactTestInstance[] {
     .filter((node) =>
       node
         .findAll((text) => String(text.type) === 'Text')
-        .some((text) => text.props.children === 'Retry')
+        .some((text) => text.props.children === 'Reconnect')
     )
 }
 
@@ -88,7 +97,7 @@ describe('the file preview Retry while the host is unreachable', () => {
     transport.forceReconnect = null
     const rendered = await render()
     expect(
-      rendered.root.findAll((node) => node.props.children === 'Waiting for desktop...')
+      rendered.root.findAll((node) => node.props.children === 'Waiting for desktop')
     ).not.toHaveLength(0)
     expect(retryButtons(rendered)).toHaveLength(0)
   })
@@ -125,7 +134,7 @@ describe('the file preview Retry while the host is unreachable', () => {
       rendered.root.find((node) => String(node.type) === 'MobileFileMarkdownPreview').props.content
     ).toBe('# Recovered preview')
     expect(
-      rendered.root.findAll((node) => node.props.children === 'Waiting for desktop...')
+      rendered.root.findAll((node) => node.props.children === 'Waiting for desktop')
     ).toHaveLength(0)
   })
 })
@@ -175,7 +184,7 @@ function pendingPreviewReply() {
   }
 }
 
-function serveReads(sendRequest: (method: string) => Promise<unknown>) {
+function serveReads(sendRequest: (method: unknown) => Promise<unknown>) {
   transport.connection = { state: 'connected', client: { sendRequest } }
 }
 
@@ -284,7 +293,7 @@ it.each(['host', 'executionHost'] as const)(
   async (authority) => {
     serveReads(async () => previewReply('Original'))
     const withExecutionHost =
-      (value: string | undefined) => (screen: ReturnType<typeof createElement>) =>
+      (value: ExecutionHostId | undefined) => (screen: ReturnType<typeof createElement>) =>
         createElement(WorkspaceExecutionHostContext.Provider, { value }, screen)
     const { rendered, editor, save } = await mountArtifact(withExecutionHost(undefined))
     await act(async () => editor().props.onChangeText('My unsaved changes'))

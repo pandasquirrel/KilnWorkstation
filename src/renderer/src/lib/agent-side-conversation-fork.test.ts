@@ -1,5 +1,5 @@
 import { getDefaultSettings } from '../../../shared/constants'
-import type { AgentProviderSessionMetadata } from '../../../shared/agent-session-resume'
+import type { AgentProviderSessionMetadata } from '../../../shared/agent-session/lifecycle/agent-session-resume'
 import { TEST_REPO, makeWorktree } from '../store/slices/worktrees-slice-test-fixtures'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -20,6 +20,7 @@ function makeState(): SideConversationState {
   return {
     activeRepoId: 'repo-1',
     activeWorktreeId: WORKTREE_ID,
+    detectedWorktreesByRepo: {},
     folderWorkspaces: [],
     projectGroups: [],
     repos: [{ ...TEST_REPO, id: 'repo-1', path: '/home/alice/repo' }],
@@ -34,6 +35,10 @@ function makeState(): SideConversationState {
       }
     ],
     settings: { ...getDefaultSettings('/tmp'), agentDefaultArgs: {}, agentDefaultEnv: {} },
+    // FORK: minimal host facts; upstream keeps adding status maps, the fork command reads none of them.
+    sshStateByEnvironment: new Map(),
+    sshConnectionStates: new Map(),
+    runtimeStatusByEnvironmentId: new Map(),
     worktreesByRepo: {
       'repo-1': [makeWorktree({ id: WORKTREE_ID, repoId: 'repo-1', path: '/home/alice/repo' })]
     }

@@ -17,6 +17,8 @@ node_modules/
 node_modules
 
 dist/
+# The declarative sample ships its prebuilt bundle so it installs without a build step.
+!examples/plugins/hello-components/dist/
 dist-electron/
 out/
 /build/
@@ -101,6 +103,9 @@ docs/**
 !docs/agents-md-refs/**
 !docs/agent-skill-sharing-implementation-checklist.md
 !docs/mobile-terminal-shortcut-bar.md
+# FORK: upstream ships tracked docs/reference; un-ignore so lint-staged can re-add formatted files
+!docs/reference/
+!docs/reference/**
 
 .stably/*
 !.stably/docs/

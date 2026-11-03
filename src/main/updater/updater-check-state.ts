@@ -5,6 +5,7 @@ import { getRetainedLinuxPackageManualInstallStatus } from '../linux-package-dow
 import type { UpdateCheckOptions, UpdateStatus } from '../../shared/update-status-types'
 import type { UpdateCheckVariant } from './updater-types'
 import { UpdaterStatus } from './updater-status'
+import type { UpdaterCodedMessage } from '../../shared/updater-failure-copy'
 import {
   AUTO_UPDATE_CHECK_INTERVAL_MS,
   AUTO_UPDATE_RETRY_INTERVAL_MS,
@@ -38,14 +39,14 @@ export abstract class UpdaterCheckState extends UpdaterStatus {
     return 'default'
   }
 
-  protected launchPendingUserInitiatedCheckAfterInFlight(variant: UpdateCheckVariant): void {
+  protected launchPendingUserInitiatedCheckAfterInFlight(options: UpdateCheckOptions): void {
     this.pendingUserInitiatedCheckAfterInFlight = null
     setTimeout(() => {
       // Wait one tick for electron-updater to clear its promise or the modifier check dedupes into the stable check.
       if (this.currentStatus.state === 'checking') {
         this.currentStatus = { state: 'idle' }
       }
-      this.checkForUpdatesFromMenu(this.getOptionsForUpdateCheckVariant(variant))
+      this.checkForUpdatesFromMenu(options)
     }, 0)
   }
 
@@ -194,9 +195,14 @@ export abstract class UpdaterCheckState extends UpdaterStatus {
     return this.consumeMissingManifestPrereleaseFallbackResult() !== null
   }
 
-  protected completeSilentUpdateCheck(userInitiated: boolean | undefined): boolean {
+  protected completeSilentUpdateCheck(
+    userInitiated: boolean | undefined,
+    options?: { preserveAvailableUpdate?: boolean }
+  ): boolean {
     const shouldRetrySoon = this.consumeSilentCheckShortRetryReason()
-    this.clearAvailableUpdateContext()
+    if (!options?.preserveAvailableUpdate) {
+      this.clearAvailableUpdateContext()
+    }
     if (shouldRetrySoon) {
       // Last-good silent results remain release transitions; preserve the short publishing retry.
       this.scheduleAutomaticUpdateCheck(AUTO_UPDATE_RETRY_INTERVAL_MS)
@@ -265,7 +271,9 @@ export abstract class UpdaterCheckState extends UpdaterStatus {
     )
   }
 
-  protected sendErrorStatus(message: string, userInitiated?: boolean): void {
+  protected sendErrorStatus(failure: string | UpdaterCodedMessage, userInitiated?: boolean): void {
+    const coded = typeof failure === 'string' ? { message: failure } : failure
+    const { message } = coded
     if (
       this.currentStatus.state === 'error' &&
       this.currentStatus.message === message &&
@@ -280,7 +288,7 @@ export abstract class UpdaterCheckState extends UpdaterStatus {
         message: 'Windows update signature check could not run'
       })
     }
-    this.sendStatus({ state: 'error', message, userInitiated })
+    this.sendStatus({ state: 'error', ...coded, userInitiated })
   }
 
   /** Retain the distro-package manual-install card when settling a check; ordinary status would erase it. */
@@ -289,7 +297,15 @@ export abstract class UpdaterCheckState extends UpdaterStatus {
     if (retainedStatus) {
       this.sendStatus(retainedStatus)
     } else if (status.state === 'error') {
-      this.sendErrorStatus(status.message, status.userInitiated)
+      const { message, messageCode, messageParams } = status
+      this.sendErrorStatus(
+        {
+          message,
+          ...(messageCode === undefined ? {} : { messageCode }),
+          ...(messageParams === undefined ? {} : { messageParams })
+        },
+        status.userInitiated
+      )
     } else {
       this.sendStatus(status)
     }
