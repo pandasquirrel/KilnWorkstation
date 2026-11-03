@@ -1,5 +1,24 @@
 ; electron-builder accepts one nsis.include; keep every customInstall/customUnInstall hook here.
 
+; FORK: electron-builder's one-click installer derives the install directory, the updater
+; cache path and the --delete-app-data target from package.json "name" ("orca"), not from
+; productName/executableName. That would overwrite a stock Orca install that shares the same
+; directory and %APPDATA% root. Force all three onto the fork's own paths so Kiln installs beside
+; Orca. !undef is required because electron-builder passes these as makensis command-line defines;
+; the !ifdef guards keep the uninstaller-only build (where one may be absent) compiling.
+!ifdef APP_FILENAME
+  !undef APP_FILENAME
+  !define APP_FILENAME "Kiln"
+!endif
+!ifdef APP_PACKAGE_NAME
+  !undef APP_PACKAGE_NAME
+  !define APP_PACKAGE_NAME "Kiln"
+!endif
+!ifdef APP_INSTALLER_STORE_FILE
+  !undef APP_INSTALLER_STORE_FILE
+  !define APP_INSTALLER_STORE_FILE "Kiln-updater\installer.exe"
+!endif
+
 !include "${__FILEDIR__}\orca-process-check.nsh"
 !include "${__FILEDIR__}\orca-user-path-cleanup.nsh"
 !include "${__FILEDIR__}\orca-other-install-check.nsh"
