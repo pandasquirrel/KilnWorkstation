@@ -1,7 +1,8 @@
+// FORK: icon options are labelled with the fork's product name.
 export const APP_ICON_OPTIONS = [
-  { id: 'classic', label: 'Classic Orca' },
-  { id: 'watercolor', label: 'Watercolor Orca' },
-  { id: 'blue', label: 'Blue Orca' }
+  { id: 'classic', label: 'Classic Kiln' },
+  { id: 'watercolor', label: 'Watercolor Kiln' },
+  { id: 'blue', label: 'Blue Kiln' }
 ] as const
 
 export type AppIconId = (typeof APP_ICON_OPTIONS)[number]['id']

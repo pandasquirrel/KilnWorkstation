@@ -16,7 +16,8 @@ const execFileAsync = promisify(execFile)
 function compatibility(): LocalBuildCompatibility {
   return {
     formatVersion: 1,
-    appId: 'com.stablyai.orca',
+    // FORK: must match ORCA_APP_ID from the compatibility contract.
+    appId: 'com.kilnworkstation.kiln',
     buildId: '1.2.3-local.1-abc-arm64',
     version: '1.2.3-local.1',
     commit: 'abc',

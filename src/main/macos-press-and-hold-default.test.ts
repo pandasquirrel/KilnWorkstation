@@ -14,7 +14,8 @@ import {
   type PressAndHoldRecord
 } from './macos-press-and-hold-default'
 
-const ORCA_DOMAIN = 'com.stablyai.orca'
+// FORK: the fork's own bundle domain replaces upstream's.
+const ORCA_DOMAIN = 'com.kilnworkstation.kiln'
 
 type HostOverrides = Partial<PressAndHoldHost> & { record?: PressAndHoldRecord | null }
 
@@ -135,11 +136,11 @@ describe('ensureMacPressAndHoldDefault', () => {
       expect(writes).toEqual([])
     })
 
-    it('accepts Orca and its channel-scoped bundles, and nothing else', () => {
-      expect(isOrcaPreferencesDomain('com.stablyai.orca')).toBe(true)
-      expect(isOrcaPreferencesDomain('com.stablyai.orca.dev')).toBe(true)
+    it('accepts Kiln and its channel-scoped bundles, and nothing else', () => {
+      expect(isOrcaPreferencesDomain('com.kilnworkstation.kiln')).toBe(true)
+      expect(isOrcaPreferencesDomain('com.kilnworkstation.kiln.dev')).toBe(true)
       expect(isOrcaPreferencesDomain('com.github.Electron')).toBe(false)
-      expect(isOrcaPreferencesDomain('com.stablyai.orcafake')).toBe(false)
+      expect(isOrcaPreferencesDomain('com.kilnworkstation.kilnfake')).toBe(false)
     })
   })
 

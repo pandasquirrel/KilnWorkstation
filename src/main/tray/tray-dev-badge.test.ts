@@ -28,8 +28,9 @@ function fakeTemplate(width: number, height: number) {
 describe('stampTrayDevBadge', () => {
   it('keeps the template canvas size and stamps opaque template-black pixels', () => {
     createFromBitmapMock.mockClear()
+    // FORK: the fork tray glyph is 22x22 (square beaver), not the upstream 22x14 wordmark.
     const width = 22
-    const height = 14
+    const height = 22
     stampTrayDevBadge(fakeTemplate(width, height) as never)
 
     const [bitmap, options] = createFromBitmapMock.mock.calls[0]
@@ -66,14 +67,15 @@ describe('stampTrayDevBadge', () => {
     }
 
     createFromBitmapMock.mockClear()
-    const base = fakeTemplate(22, 14)
+    const base = fakeTemplate(22, 22)
     stampTrayDevBadge(base as never, 2)
     expect(base.toBitmap).toHaveBeenCalledWith({ scaleFactor: 2 })
     const [bitmap2x, options2x] = createFromBitmapMock.mock.calls[0]
-    expect(options2x).toEqual({ width: 44, height: 28 })
+    expect(options2x).toEqual({ width: 44, height: 44 })
 
     createFromBitmapMock.mockClear()
-    stampTrayDevBadge(fakeTemplate(22, 14) as never, 1)
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: the fake exposes only the nativeImage surface stampTrayDevBadge reads.
+    stampTrayDevBadge(fakeTemplate(22, 22) as never, 1)
     const [bitmap1x] = createFromBitmapMock.mock.calls[0]
 
     expect(opaque(bitmap2x)).toBe(opaque(bitmap1x) * 4)

@@ -74,25 +74,27 @@ export function installedElectronCandidates(
   environment: NodeJS.ProcessEnv
 ): string[] {
   const joinPath = platform === 'win32' ? win32.join : posix.join
+  // FORK: resolve the fork's own install (productName Kiln); a stock Orca install is a different app.
   if (platform === 'darwin') {
     return [
-      '/Applications/Orca.app/Contents/MacOS/Orca',
-      joinPath(homePath, 'Applications', 'Orca.app', 'Contents', 'MacOS', 'Orca')
+      '/Applications/Kiln.app/Contents/MacOS/Kiln',
+      joinPath(homePath, 'Applications', 'Kiln.app', 'Contents', 'MacOS', 'Kiln')
     ]
   }
   if (platform === 'win32') {
     return [
       ...(environment.LOCALAPPDATA
-        ? [joinPath(environment.LOCALAPPDATA, 'Programs', 'Orca', 'Orca.exe')]
+        ? [joinPath(environment.LOCALAPPDATA, 'Programs', 'Kiln', 'Kiln.exe')]
         : []),
-      ...(environment.ProgramFiles ? [joinPath(environment.ProgramFiles, 'Orca', 'Orca.exe')] : [])
+      ...(environment.ProgramFiles ? [joinPath(environment.ProgramFiles, 'Kiln', 'Kiln.exe')] : [])
     ]
   }
   return [
     joinPath(homePath, '.local', 'bin', 'orca-ide'),
     '/usr/local/bin/orca-ide',
     '/usr/bin/orca-ide',
-    '/opt/Orca/orca-ide'
+    // The Linux .deb installs under productName while the executable keeps its CLI name.
+    '/opt/Kiln/orca-ide'
   ]
 }
 

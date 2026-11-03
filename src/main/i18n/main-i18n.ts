@@ -6,6 +6,7 @@ import i18next, {
   type TOptions
 } from 'i18next'
 
+import { rebrandProductName } from '../../shared/fork-brand'
 import {
   resolvePluralFamilyKey,
   withPluralCategoriesFromOther
@@ -133,5 +134,9 @@ export function translateMain(key: string, fallback: string, options?: TOptions)
     defaultValue: fallback,
     ...options
   })
-  return isPseudoLocalizationLocale(mainI18n.language) ? pseudoLocalizeString(value) : value
+  const localized = isPseudoLocalizationLocale(mainI18n.language)
+    ? pseudoLocalizeString(value)
+    : value
+  // FORK: upstream catalogs stay pristine; the fork brand name is applied at this single choke point.
+  return rebrandProductName(localized)
 }

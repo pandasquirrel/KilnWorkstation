@@ -1,8 +1,9 @@
 #!/bin/bash
 # Generate app icons from Icon Composer .icon project
 # Produces: resources/build/icon.icns (macOS), resources/build/icon.png (fallback), resources/icon.png (tray)
-# FORK: shipped icons derive from icon-source/kiln-badge.png (Kiln badge). icon.icon/ still
-# holds upstream art, so port it there before rerunning this script on macOS.
+# FORK: shipped icons derive from icon-source/beaver-icon.png, rendered from beaver-icon.svg
+# (fork brand mark). icon.icon/ still holds upstream art, so port the beaver there before
+# rerunning this script on macOS.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

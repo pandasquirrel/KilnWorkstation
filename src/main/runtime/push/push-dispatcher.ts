@@ -135,7 +135,8 @@ export class PushDispatcher {
           notificationEpoch: target.notificationEpoch,
           source: 'agent-task-complete',
           agentState: null,
-          title: 'Orca',
+          // FORK: mobile push notifications carry the fork's product name.
+          title: 'Kiln',
           body: '',
           sound: false
         }

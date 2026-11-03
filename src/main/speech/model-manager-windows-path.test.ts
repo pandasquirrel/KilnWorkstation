@@ -71,7 +71,8 @@ describe('ModelManager Windows model path handling', () => {
       const manager = new ModelManager(undefined, openElectronSpeechDownloadRequest)
 
       expect(manager.getModelsDir()).not.toContain(userDataDir)
-      expect(manager.getModelsDir()).toContain(join(programDataDir, 'Orca', 'speech-models'))
+      // FORK: the shared ASCII cache lives under the fork's root.
+      expect(manager.getModelsDir()).toContain(join(programDataDir, 'Kiln', 'speech-models'))
       expect(isAsciiPath(manager.getModelsDir())).toBe(true)
       expect(existsSync(manager.getModelsDir())).toBe(true)
     } finally {

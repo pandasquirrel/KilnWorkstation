@@ -1,6 +1,7 @@
 import { shell } from 'electron'
 
-const MACOS_PACKAGED_BUNDLE_ID = 'com.stablyai.orca'
+// FORK: must match the packaged bundle id in electron-builder.config.cjs.
+const MACOS_PACKAGED_BUNDLE_ID = 'com.kilnworkstation.kiln'
 const MACOS_NOTIFICATION_SETTINGS_URL =
   'x-apple.systempreferences:com.apple.Notifications-Settings.extension'
 

@@ -8,13 +8,14 @@ export type LogStreamChild = ChildProcessByStdio<Writable, Readable, Readable>
 // AUTHREQ_PROMPTING identifies actual dialogs, including access attributed to Orca’s terminal children (#9756).
 
 // TCC can attribute terminal access to the detached helper independently of the main app.
+// FORK: watch the fork's bundle identities only; a stock Orca install raises its own prompts.
 const ORCA_RESPONSIBLE_IDENTIFIERS = new Set([
-  'com.stablyai.orca',
-  'com.stablyai.orca.helper',
-  'com.stablyai.orca.dev',
-  'com.stablyai.orca.dev.helper',
-  'com.stablyai.orca.local',
-  'com.stablyai.orca.local.helper'
+  'com.kilnworkstation.kiln',
+  'com.kilnworkstation.kiln.helper',
+  'com.kilnworkstation.kiln.dev',
+  'com.kilnworkstation.kiln.dev.helper',
+  'com.kilnworkstation.kiln.local',
+  'com.kilnworkstation.kiln.local.helper'
 ])
 
 const WATCHED_SERVICES = new Set([

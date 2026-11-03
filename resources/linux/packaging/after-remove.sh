@@ -13,7 +13,8 @@ link="/usr/bin/orca-ide"
 if [ -L "$link" ]; then
   target="$(readlink "$link" || true)"
   case "$target" in
-    /opt/Orca/*|/opt/orca-ide/*|/opt/orca/*)
+    # FORK: also reclaim links this fork created under /opt/Kiln.
+    /opt/Kiln/*|/opt/Orca/*|/opt/orca-ide/*|/opt/orca/*)
       rm -f "$link"
       ;;
   esac

@@ -28,6 +28,7 @@ import { isPluginUiLanguage, type UiLanguage } from '../../../shared/ui-language
 import type { PluginLanguagePackRegistration } from '../../../shared/plugins/plugin-language-pack-artifact'
 import { replacePluginLanguagePackResources } from '../../../shared/plugins/plugin-language-pack-i18n-resources'
 import { withTimeout } from '../../../shared/promise-timeout-fallback'
+import { rebrandProductName } from '../../../shared/fork-brand'
 import {
   resolvePluralFamilyKey,
   withPluralCategoriesFromOther
@@ -117,7 +118,9 @@ let plainTranslationCacheScope = ''
 
 function translateUncached(key: string, fallback: string, options?: TOptions): string {
   const value = i18n.t(resolvePluralFamilyKey(key, options), { defaultValue: fallback, ...options })
-  return isPseudoLocalizationLocale(i18n.language) ? pseudoLocalizeString(value) : value
+  const localized = isPseudoLocalizationLocale(i18n.language) ? pseudoLocalizeString(value) : value
+  // FORK: upstream catalogs stay pristine; the fork brand name is applied at this single choke point.
+  return rebrandProductName(localized)
 }
 
 export function translate(key: string, fallback: string, options?: TOptions): string {

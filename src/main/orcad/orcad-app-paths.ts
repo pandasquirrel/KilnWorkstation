@@ -16,8 +16,10 @@ export function resolveUserDataPath(): string {
   if (explicit) {
     return explicit
   }
+  // FORK: the daemon's own data root is named after the fork so it cannot share a stock Orca profile.
+  // The env var keeps its upstream name because launchers and scripts set `ORCA_USER_DATA`.
   const xdg = env('XDG_DATA_HOME')
-  return xdg ? join(xdg, 'Orca') : join(homedir(), '.orca')
+  return xdg ? join(xdg, 'Kiln') : join(homedir(), '.kiln')
 }
 
 function resolveAppDataPath(): string {

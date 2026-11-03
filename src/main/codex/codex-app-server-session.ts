@@ -293,7 +293,7 @@ export async function runCodexAppServerSession<T>(
   try {
     const session = async (): Promise<T> => {
       await requestRpc('initialize', {
-        clientInfo: { name: 'orca_desktop', title: 'Orca', version: '0.0.0' }
+        clientInfo: { name: 'orca_desktop', title: 'Kiln', version: '0.0.0' }
       })
       notify('initialized')
       return body({ request: requestRpc, notify, signal: lifetime.signal })

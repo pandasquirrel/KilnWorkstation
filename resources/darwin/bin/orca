@@ -19,7 +19,8 @@ if [ -z "$APP_PATH" ]; then
 fi
 
 CONTENTS="$APP_PATH/Contents"
-ELECTRON="$CONTENTS/MacOS/Orca"
+# FORK: the bundle executable follows productName, while the installed command stays `orca`.
+ELECTRON="$CONTENTS/MacOS/Kiln"
 # The unpacked entrypoint runs directly in Electron's Node mode.
 CLI="$CONTENTS/Resources/app.asar.unpacked/out/cli/index.js"
 

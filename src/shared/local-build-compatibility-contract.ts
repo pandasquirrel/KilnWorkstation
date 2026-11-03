@@ -1,6 +1,7 @@
 export const LOCAL_BUILD_COMPATIBILITY_CONTRACT = {
   formatVersion: 1,
-  appId: 'com.stablyai.orca',
+  // FORK: fork bundle identity; must match electron-builder appId.
+  appId: 'com.kilnworkstation.kiln',
   stateSchemaVersion: 1,
   readableStateSchemaVersions: [1],
   daemonProtocolVersion: 53,

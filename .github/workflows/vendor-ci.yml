@@ -59,9 +59,19 @@ jobs:
         if: github.event_name != 'pull_request' || github.head_ref != 'vendor/sync-latest'
         run: |
           BASE=$(git merge-base origin/main HEAD)
-          DIRS=$(git diff --name-only "$BASE" HEAD | grep -P '\.test\.ts$' |
-            xargs -r -n1 dirname | sort -u | head -30 | tr '\n' ' ')
-          if [ -n "$DIRS" ]; then pnpm test $DIRS; else echo "no test files in diff"; fi
+          # A directory holding many direct test files (src/main has well over a
+          # hundred) would run that whole suite here and blow the 45-minute job
+          # budget, so scope those to the changed files instead of the directory.
+          SCOPE=$(git diff --name-only "$BASE" HEAD | grep -P '\.test\.ts$' | sort -u |
+            while IFS= read -r test_file; do
+              dir=$(dirname "$test_file")
+              if [ "$(find "$dir" -maxdepth 1 -name '*.test.ts' | wc -l)" -gt 20 ]; then
+                printf '%s\n' "$test_file"
+              else
+                printf '%s\n' "$dir"
+              fi
+            done | sort -u | head -30 | tr '\n' ' ')
+          if [ -n "$SCOPE" ]; then pnpm test $SCOPE; else echo "no test files in diff"; fi
 
   # Upstream topology (config/scripts/ci-unit-files.mjs UNIT_EXCLUDE): root
   # unit shards exclude cross-version-wire (materializes full release trees),
