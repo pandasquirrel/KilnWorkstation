@@ -8,6 +8,6 @@
 // this constant once Kiln ships signed release artifacts and the packaging `publish` target points
 // at the fork (also rename the updater cache directory, which electron-updater currently derives
 // from package.json "name" as `orca-updater`).
-// oxlint-disable-next-line unicorn/no-typeof-undefined -- process is absent in non-Node bundler contexts.
-const isTestRuntime = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+// `process` is guaranteed in both the packaged main process and vitest; no guard needed.
+const isTestRuntime = process.env.NODE_ENV === 'test'
 export const FORK_UPSTREAM_UPDATES_ENABLED = isTestRuntime
