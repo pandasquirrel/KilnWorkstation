@@ -20,6 +20,15 @@ PR 描述可用中文；代码注释沿用仓库现有语言。
 - **不要改 `AGENTS.md` 与 `docs/agents-md-refs/`**：上游 30 天改 26 次，
   写入会在吸收时持续冲突。fork 约定一律放本文件。
 
+## 架构与决策记录
+
+- 架构变动、方案选型、关键决策（含"决定不做什么"和挂起项）必须在
+  **同一个 PR** 内更新 [`docs/fork/customizations.md`](./docs/fork/customizations.md)
+  的对应章节与文末决策日志；只写 `// FORK:` 代码注释不算落地。
+- 这条规则随仓库走，**换机、换人、换 agent 均有效**；例行吸收上游不写
+  新日志，但暴露了新吸收风险点要补该文件第 7 节。
+- 该文件同时是相对上游全部架构级定制的索引（品牌/隔离/更新/侧会话/vendor 机制）。
+
 ## 仓库设置变更要先问
 
 禁用/启用 workflow、取消 CI run、改分支保护或仓库可见性等，
@@ -35,5 +44,6 @@ PR 描述可用中文；代码注释沿用仓库现有语言。
 
 ## 导航
 
+- 定制地图、决策日志、挂起项、吸收风险 checklist：`docs/fork/customizations.md`
 - 分支拓扑、吸收 SOP、冲突红线、footprint 审计：`scripts/vendor/README.md`
 - 上游通用规范：`AGENTS.md`
