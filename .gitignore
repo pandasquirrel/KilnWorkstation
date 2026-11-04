@@ -106,6 +106,9 @@ docs/**
 # FORK: upstream ships tracked docs/reference; un-ignore so lint-staged can re-add formatted files
 !docs/reference/
 !docs/reference/**
+# FORK: fork-only architecture/decision records (docs/fork/customizations.md)
+!docs/fork/
+!docs/fork/**
 
 .stably/*
 !.stably/docs/
