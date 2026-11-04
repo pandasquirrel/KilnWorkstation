@@ -12,6 +12,7 @@ import type {
   RemoteServerUpdaterSnapshot,
   RemoteServerUpdateSupport
 } from '../../shared/remote-server-update'
+import { FORK_UPSTREAM_UPDATES_ENABLED } from '../../shared/fork-updates'
 import { getLinuxPackageType } from '../linux-update-package-type'
 import { createUpdaterDiagnosticLogger } from '../linux-package-install-diagnostic'
 import { registerAutoUpdaterHandlers } from '../updater-events'
@@ -102,6 +103,10 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
     channel: ReleaseChannel,
     options?: ReleaseBuildListOptions
   ): Promise<ReleaseBuild[]> {
+    // FORK: dev-channel build lists resolve upstream Orca releases; none are installable here.
+    if (!FORK_UPSTREAM_UPDATES_ENABLED) {
+      return []
+    }
     return super.listAvailableReleaseBuilds(channel, options)
   }
 
@@ -142,6 +147,11 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
     if (!app.isPackaged) {
       return
     }
+    // FORK: never wire background checks or the upstream feed while Kiln has no release channel
+    // of its own; see src/shared/fork-updates.ts.
+    if (!FORK_UPSTREAM_UPDATES_ENABLED) {
+      return
+    }
 
     const autoUpdater = this.getAutoUpdater()
     configureMacShipItScheduling()
@@ -162,7 +172,8 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
     if (this.activeUpdateSource === 'release') {
       autoUpdater.setFeedURL({
         provider: 'generic',
-        url: 'https://github.com/stablyai/orca/releases/latest/download'
+        // FORK: the fork's own releases, never upstream Orca's (see src/shared/fork-updates.ts).
+        url: 'https://github.com/pandasquirrel/KilnWorkstation/releases/latest/download'
       })
     }
     if (this.autoUpdaterInitialized) {

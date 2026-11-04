@@ -1,6 +1,7 @@
 import { app } from 'electron'
 import { isMacInstallRequested } from '../updater-mac-install'
 import { withUpdaterSpan } from '../observability/instrumentation'
+import { FORK_UPSTREAM_UPDATES_ENABLED } from '../../shared/fork-updates'
 import {
   AUTO_UPDATE_CHECK_INTERVAL_MS,
   AUTO_UPDATE_RETRY_INTERVAL_MS,
@@ -45,6 +46,10 @@ export abstract class UpdaterScheduling extends UpdaterCheckFailure {
   protected runBackgroundUpdateCheck(
     nudgeId: string | null = this.getPersistedPendingUpdateNudgeId()
   ): boolean {
+    // FORK: no background checks against upstream Orca until Kiln has its own release feed.
+    if (!FORK_UPSTREAM_UPDATES_ENABLED) {
+      return false
+    }
     if (
       this.pendingQuitAndInstallTimer ||
       this.quitAndInstallInProgress ||
