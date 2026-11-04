@@ -10,7 +10,7 @@ import {
   structuredAgentSessionMessageSelection,
   structuredAgentSessionShownSnapshot
 } from '../../../src/shared/agent-session/options/structured-agent-session-option-view'
-import { agentChatPermissionModes } from '../../../src/shared/agent-chat-permission-mode'
+import { agentChatPermissionModes } from '../../../src/shared/agent-launch/permissions/agent-chat-permission-support'
 import { legacyHostPermissionDescriptor } from '../../../src/shared/agent-session/options/structured-agent-session-permission-option'
 import type { RpcClient } from '../transport/rpc-client'
 import type { StructuredAgentSessionHostSupport } from './mobile-structured-agent-session-host-support'
@@ -22,6 +22,7 @@ import {
   createStructuredAgentSessionOptionsWriteOwner
 } from '../../../src/shared/agent-session/options/structured-agent-session-options-write-owner'
 import { useMobileStructuredOptionSurface } from './use-mobile-structured-option-surface'
+import { lockedStructuredAgentSessionOptionSnapshot } from '../../../src/shared/agent-session/options/structured-agent-session-option-snapshot'
 
 const NO_COMMANDS: readonly AgentSessionConversationCommand[] = []
 
@@ -117,10 +118,13 @@ export function useMobileStructuredAgentOptions(args: {
       }),
     [controller, projectRuntimeReports, hostSupport?.permissionOwn]
   )
-  const shown = structuredAgentSessionShownSnapshot(readOptionState())
-  const optionSnapshot = legacyHostPermissions
-    ? [...shown, legacyHostPermissionDescriptor()]
-    : shown
+  const acceptsPicks = !!client && !!sessionId && enabled && fence !== null
+  const readOptionSnapshot = useCallback(() => {
+    const shown = structuredAgentSessionShownSnapshot(readOptionState())
+    const snapshot = legacyHostPermissions ? [...shown, legacyHostPermissionDescriptor()] : shown
+    return acceptsPicks ? snapshot : lockedStructuredAgentSessionOptionSnapshot(snapshot)
+  }, [acceptsPicks, legacyHostPermissions, readOptionState])
+  const optionSnapshot = readOptionSnapshot()
 
   const readWriteContext = () => {
     const currentState = projectRuntimeReports({
@@ -132,8 +136,8 @@ export function useMobileStructuredAgentOptions(args: {
       controller,
       record: optionStateRef.current.record,
       view,
-      snapshot: structuredAgentSessionShownSnapshot(view),
-      ready: !!client && !!sessionId,
+      snapshot: readOptionSnapshot(),
+      ready: acceptsPicks,
       providerStarting,
       isCurrentContext,
       flush: (isCurrent: () => boolean) => {
@@ -188,13 +192,15 @@ export function useMobileStructuredAgentOptions(args: {
       optionSnapshot,
       demandModelCatalog,
       setStructuredOption,
-      readOptionState
+      readOptionSnapshot
     })
 
   return {
     optionPickerRequest,
     conversationCommands:
       conversationSupport?.sessionId === sessionId ? conversationSupport.commands : NO_COMMANDS,
+    compactInstructions:
+      conversationSupport?.sessionId === sessionId && conversationSupport.compactInstructions,
     acceptsImages:
       (imageSupport?.sessionId === sessionId ? imageSupport.acceptsImages : undefined) ??
       (agent !== null && isAgentSessionHandleProvider(agent)),
