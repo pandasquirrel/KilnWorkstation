@@ -10,7 +10,7 @@
 > 均生效。例行跟随上游的吸收不需要新决策日志，但暴露了新的吸收高风险触点
 > 时要补第 7 节。
 
-最后更新：2026-11-04（吸收上游至 v1.4.247 后）
+最后更新：2026-11-05（吸收上游至 v1.4.249 后）
 
 ## 1. 总览
 
@@ -144,14 +144,22 @@ workflow 自动禁用（只留 vendor-ci/vendor-sync）。
    - 函数体内的 FORK 改动通常被 git 自动保留（rename+modify 三方合并），
      冲突多在 import 段——跟随新路径、修正相对深度即可；
    - **我方新增的测试/文件也要一起搬家并更新 mock 路径**（本次 fork
-     updater 测试从 `src/main/` 搬进 `src/main/updater/`）。
+     updater 测试从 `src/main/` 搬进 `src/main/updater/`）；
+   - **fork 自有文件不在上游 rename 集合里，import 不会被自动改**：
+     2026-11-05 吸收 v1.4.249 时 `shared/agent-status-types`
+     →`agent-status/contracts/…`、`shared/stable-pane-id`
+     →`workspace-layout/stable-pane-id`、`shared/ai-vault-types`
+     →`ai-vault/contracts/…`，两个侧会话文件的旧路径 import 全靠完整
+     `pnpm tc` 才抓到（grep `from '…shared/<旧模块名>` 可提前定位）。
 3. **本地验证必须跑完整 `pnpm tc`**（含 renderer 项目），`tc:node` 会漏掉
    渲染侧定制文件的坏 import；随后跑受影响目标测试。
 4. **merge commit 前必须 `git add -A`**：index 快照早于后续修复会造成
    "本地绿、CI 红"。
 5. **上游"低价值测试清理"删除的文件**：若承载我方身份/路径断言，按
    FORK 保留并加注释（已有先例：dev-instance-identity、orcad-app-paths、
-   macos-tcc-prompt-watch）。
+   macos-tcc-prompt-watch）；若被删测试不含我方断言（如 2026-11-05 的
+   `pane-agent-session-id.test.ts`，只覆盖上游 id 函数），随上游删除、
+   不保留——判据是 `git log <base>..origin/main -- <file>` 有无 fork 提交。
 6. **mobile 工作区**：吸收后 `cd mobile && pnpm install --frozen-lockfile`，
    上游可能加依赖（expo-localization 先例），否则 build:mobile-web 失败。
 7. **Electron 小版本升级**：同主版本 ABI 不变时（如 43.8.1→43.8.6，

@@ -1,6 +1,6 @@
 import type { AgentProviderSessionMetadata } from '../../../shared/agent-session/lifecycle/agent-session-resume'
 import { isResumableTuiAgent } from '../../../shared/agent-session/lifecycle/agent-session-resume'
-import { isAiVaultAgent } from '../../../shared/ai-vault-types'
+import { isAiVaultAgent } from '../../../shared/ai-vault/contracts/ai-vault-types'
 import { getAgentForkArgv } from '../../../shared/agent-launch/startup/agent-resume-argv'
 import { buildAiVaultForkStartupForWorktree } from './ai-vault-session-fork-startup'
 import { getAiVaultResumeWorkspacePath } from './ai-vault-resume-shell'
