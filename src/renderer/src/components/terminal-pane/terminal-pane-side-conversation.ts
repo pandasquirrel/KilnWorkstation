@@ -2,7 +2,7 @@ import { toast } from 'sonner'
 import type { ManagedPane } from '@/lib/pane-manager/pane-manager'
 import type { AppState } from '@/store/types'
 import { useAppStore } from '@/store'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import { makePaneKey } from '../../../../shared/workspace-layout/stable-pane-id'
 import { translate } from '@/i18n/i18n'
 import {
   buildSideConversationForkCommand,
