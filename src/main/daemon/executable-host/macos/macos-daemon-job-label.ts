@@ -1,0 +1,13 @@
+import { createHash } from 'node:crypto'
+import { resolve } from 'node:path'
+import { PROTOCOL_VERSION } from '../../protocol/daemon-protocol-version'
+
+/** Keep labels stable across upgrades, isolated by profile and protocol. */
+export function macDaemonJobLabel(
+  userDataPath: string,
+  protocolVersion = PROTOCOL_VERSION
+): string {
+  const profileKey = createHash('sha256').update(resolve(userDataPath)).digest('hex').slice(0, 16)
+  // FORK: launchd labels belong to the fork identity so Kiln and a stock Orca install stay isolated.
+  return `com.kilnworkstation.kiln.terminal.${profileKey}.v${protocolVersion}`
+}

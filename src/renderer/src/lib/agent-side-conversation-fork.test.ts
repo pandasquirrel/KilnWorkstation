@@ -1,6 +1,7 @@
 import { getDefaultSettings } from '../../../shared/constants'
 import type { AgentProviderSessionMetadata } from '../../../shared/agent-session/lifecycle/agent-session-resume'
-import { TEST_REPO, makeWorktree } from '../store/slices/worktrees-slice-test-fixtures'
+import { TEST_REPO } from '../store/repos/repo.test-fixture'
+import { makeWorktree } from '../store/slices/worktrees/worktree.test-fixture'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/new-workspace', () => ({
