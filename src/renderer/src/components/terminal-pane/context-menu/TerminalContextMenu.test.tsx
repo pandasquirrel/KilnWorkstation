@@ -3,12 +3,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import TerminalContextMenu from './TerminalContextMenu'
 import { translate } from '@/i18n/i18n'
+import type * as I18nModule from '@/i18n/i18n'
 import type { KeybindingOverrides } from '../../../../../shared/keybindings/types'
 
 type ItemProps = { onSelect?: () => void; children?: React.ReactNode }
 
-const items = vi.hoisted(() => ({ list: [] as ItemProps[] }))
-const shortcuts = vi.hoisted(() => ({ list: [] as string[] }))
+const items = vi.hoisted((): { list: ItemProps[] } => ({ list: [] }))
+const shortcuts = vi.hoisted((): { list: string[] } => ({ list: [] }))
 
 vi.mock('@/components/ui/dropdown-menu', async () => {
   const React_ = await import('react')
@@ -41,7 +42,7 @@ vi.mock('@/components/ui/dropdown-menu', async () => {
   }
 })
 vi.mock('@/i18n/i18n', async (importOriginal) => ({
-  ...((await importOriginal()) as Record<string, unknown>),
+  ...(await importOriginal<typeof I18nModule>()),
   translate: vi.fn((_key: string, fallback: string) => fallback)
 }))
 vi.mock('@/lib/agent-catalog', () => ({ AgentIcon: () => null }))
