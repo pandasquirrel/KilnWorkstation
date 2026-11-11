@@ -8,8 +8,8 @@ import {
   buildSideConversationForkCommand,
   canForkSideConversation
 } from '@/lib/agent-side-conversation-fork'
-import { resolvePaneAgentSession } from './pane-agent-session-id'
-import { dispatchTerminalPaneSplitRequest } from './terminal-pane-split-request-routing'
+import { resolvePaneAgentSession } from '@/lib/agent-session/identity/pane-agent-session-id'
+import { dispatchTerminalPaneSplitRequest } from './layout/split/terminal-pane-split-request-routing'
 
 export function canOpenSideConversation(
   state: AppState,

@@ -66,13 +66,13 @@ describe('electron-builder mac channel config', () => {
     expect(electronBuilderConfig.mac.notarize).toBe(false)
   })
 
-  // Twenty-four hourly releases would evict stable/RC from main repo’s ten-entry feed.
-  it('publishes hourly builds to the separate hourly repo', () => {
+  // FORK: Kiln has no split release feeds yet; every channel publishes to the fork repo as a prerelease.
+  it('publishes hourly builds as prereleases to the fork repo', () => {
     withHourlyEnv((config) => {
-      expect(config.publish).toMatchObject({ repo: 'orca-hourly', releaseType: 'prerelease' })
+      expect(config.publish).toMatchObject({ repo: 'KilnWorkstation', releaseType: 'prerelease' })
     })
     expect(electronBuilderConfig.publish).toMatchObject({
-      repo: 'orca',
+      repo: 'KilnWorkstation',
       releaseType: 'draft'
     })
   })
@@ -94,7 +94,7 @@ describe('electron-builder mac channel config', () => {
       expect(config.mac.hardenedRuntime).toBe(true)
       expect(config.mac.notarize).toBe(true)
       expect(config.forceCodeSigning).toBe(true)
-      expect(config.publish).toMatchObject({ repo: 'orca-adhoc', releaseType: 'prerelease' })
+      expect(config.publish).toMatchObject({ repo: 'KilnWorkstation', releaseType: 'prerelease' })
     })
   })
 
@@ -114,7 +114,7 @@ describe('electron-builder mac channel config', () => {
       expect(config.mac.hardenedRuntime).toBe(true)
       expect(config.mac.notarize).toBe(true)
       expect(config.forceCodeSigning).toBe(true)
-      expect(config.publish).toMatchObject({ repo: 'orca-daily', releaseType: 'prerelease' })
+      expect(config.publish).toMatchObject({ repo: 'KilnWorkstation', releaseType: 'prerelease' })
     })
   })
 

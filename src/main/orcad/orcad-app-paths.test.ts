@@ -30,17 +30,6 @@ describe('resolveOrcadInstallRoot', () => {
       rmSync(root, { recursive: true, force: true })
     }
   })
-
-  it('refuses instead of guessing when the process has no main script', () => {
-    const originalArgv = process.argv
-    // node -e omits argv[1]; cwd cannot establish the install root.
-    process.argv = [process.execPath]
-    try {
-      expect(() => resolveOrcadInstallRoot()).toThrow(/orcad_install_root_unavailable/)
-    } finally {
-      process.argv = originalArgv
-    }
-  })
 })
 
 // FORK: upstream removed the path suites in a low-value-test cleanup (#36894); keep

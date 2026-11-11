@@ -1,8 +1,8 @@
 import { getRepoExecutionHostId } from '../../../../../../shared/execution-host'
 import { useEffect, useRef } from 'react'
-import { getRuntimeGitStatus } from '@/runtime/runtime-git-status-client'
-import { getRuntimeGitUpstreamStatus } from '@/runtime/runtime-git-sync-client'
-import { resolveWorktreeGitCopyNow } from '@/lib/worktree-git-copy'
+import { getRuntimeGitStatus } from '@/runtime/source-control/git/runtime-git-status-client'
+import { getRuntimeGitUpstreamStatus } from '@/runtime/source-control/git/runtime-git-sync-client'
+import { resolveWorktreeGitCopyNow } from '@/lib/workspace/ownership/worktree-git-copy'
 import {
   buildChecksPanelEligibilityGitFingerprint,
   shouldClearChecksPanelGitStatusSnapshot,
