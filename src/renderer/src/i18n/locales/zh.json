@@ -16916,6 +16916,12 @@
           "3df53d554a": "错过运行宽限期帮助",
           "fc089e5fde": "宽限期"
         },
+        "AutomationModelField": {
+          "defaultChoice": "跟随智能体默认",
+          "label": "模型",
+          "defaultBadge": "默认",
+          "pending": "正在加载模型…"
+        },
         "AutomationPrecheckFields": {
           "d2a2ac89ac": "10分钟",
           "bf49585b3c": "5分钟",

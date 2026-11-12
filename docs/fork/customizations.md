@@ -17,11 +17,12 @@
 | #   | 区域                            | 性质                       | 触点规模                                        |
 | --- | ------------------------------- | -------------------------- | ----------------------------------------------- |
 | 1   | 品牌与身份（Kiln / 海狸）       | 产品个性化                 | 最大，~25 文件                                  |
-| 2   | 终端侧会话（Side Conversation） | **唯一的自有产品功能**     | 3 源文件 + 测试                                 |
+| 2   | 终端侧会话（Side Conversation） | 自有产品功能之一           | 3 源文件 + 测试                                 |
 | 3   | 与官方 Orca 共存的隔离层        | 安装/运行时基建            | ~15 文件                                        |
 | 4   | 更新策略                        | 禁用官方更新，预留自建通道 | 4 文件                                          |
 | 5   | vendor 跟随机制                 | 每日吸收上游的自动化       | `.github/workflows/vendor-*`、`scripts/vendor/` |
 | 6   | 测试守护                        | 保留/新增的 FORK 测试      | 19 个测试文件                                   |
+| 7   | 自动化编辑器（显式模型字段）    | 自有产品功能               | 1 新文件 + 2 上游文件 + i18n                    |
 
 深改点统一标 `// FORK: <原因>`（NSIS 用 `; FORK:`，YAML/Markdown 用
 `<!-- FORK: -->`），每月用 `git grep -n "FORK:"` 审计，footprint 目标只减不增。
@@ -113,7 +114,9 @@ second-instance 事件。2026-11-04 实测：Kiln 运行中启动 Orca，前台�
 - 重新启用的前提：Kiln 自己的签名发布产物 + feed 就绪；届时翻转开关并处理
   挂起项（第 8 节）。
 
-## 5. 终端侧会话（自有功能）
+## 5. 自有产品功能
+
+### 5.1 终端侧会话（Side Conversation）
 
 终端面板里把当前 agent 会话**分叉到分屏新 pane 继续对话**；源 pane 保持
 原会话唯一写入者（CLI fork 出新 agent id 保证安全）。
@@ -125,6 +128,24 @@ second-instance 事件。2026-11-04 实测：Kiln 运行中启动 Orca，前台�
   （2026-11-04 起的新路径；上游目录重组频繁，import 路径是吸收高风险点）。
 - 新增 i18n 键直接进 en.json（`sideConversation.*` 等），非品牌词不经
   运行时改写。
+
+### 5.2 自动化编辑器：显式模型字段
+
+上游自动化创建/编辑的智能体选择器只把模型放在行内二级菜单（行右侧的
+`›` 子面板），且触发器带固定 `triggerLabel`，表单上看不到、也无法直接
+选择已运行模型。FORK 在智能体字段下新增独立「模型」下拉：回显当前生效
+模型、可直接修改、首项为「跟随智能体默认」，创建任务前即可看清运行环境。
+
+- 写入不新增字段：仍复用 `pickAutomationLaunch` →
+  `foldAutomationSourceEdit` 的既有调和链路，落到
+  `launchPreferences.model`（与选择器内部同一路径，`--model` 参数同步）。
+- 新文件 `src/renderer/src/components/automations/authoring/
+  AutomationModelField.tsx`（上游无对应文件，吸收冲突面小）。
+- 上游文件只加挂载点：`AutomationAgentLaunchPicker.tsx`（import + 渲染）
+  与 `AutomationEditorSettingsSidebar.tsx`（传入 `pickerTriggerClassName`）。
+- i18n 新键 `auto.components.automations.AutomationModelField.*`
+  （en.json 由 `sync:localization-catalog` 生成，zh.json 手补）。
+- 上游若实现同类字段，吸收时删除本定制并在决策日志标 superseded。
 
 ## 6. vendor 跟随机制
 
@@ -199,15 +220,16 @@ workflow 自动禁用（只留 vendor-ci/vendor-sync）。
 
 ## 9. 决策日志
 
-| 日期       | 决策                                                           | 理由                                                     | 载体                                  |
-| ---------- | -------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------- |
-| 2026-10-26 | vendoring 只 merge 不 rebase/squash                            | 保留上游 SHA，rerere 可复用判法                          | `scripts/vendor/README.md`、CLAUDE.md |
-| 2026-10-26 | 深改点统一 `// FORK:` 标记，footprint 只减不增                 | 每月可审计，目标是做成扩展点向上游提 PR 后删除           | 全仓库                                |
-| 2026-10-28 | 吸收 PR 质量门禁只审 fork footprint（基线=vendor/upstream 尖） | 上游存量 lint 欠账不该挡住吸收；回归归 main 全量通道     | vendor-ci.yml                         |
-| 2026-10-31 | 品牌名运行时改写，catalog 保持上游原样                         | 吸收零冲突、词表单点维护                                 | §2.1                                  |
-| 2026-10-31 | 保留 `orca:` deep-link scheme                                  | 兼容已有链接/OAuth                                       | §2.3                                  |
-| 2026-11-03 | package.json `name` 不改，安装差异用 NSIS `!undef` 收口        | electron-builder 路径全由 name 推导；改名牵动面太大      | §2.3、§3                              |
-| 2026-11-03 | 安装隔离必须实测路径，不看元数据                               | 静默安装曾覆盖官方 Orca 程序文件                         | §3 验收红线                           |
-| 2026-11-04 | userData/单实例锁固定 `%APPDATA%\Kiln`，旧数据不迁移           | 彻底消除与官方版的锁与数据共用；旧数据可能已与官方版混用 | §3、§8                                |
-| 2026-11-04 | 自建 feed 前禁用一切官方更新查询                               | 官方"更新"会装回 Orca，与 Kiln 冲突                      | §4                                    |
-| 2026-11-04 | 架构/决策必须随 PR 记入本文件（跨机/跨人生效）                 | 决策只存在个人记忆里会随机器丢失                         | 本文件顶部维护规则                    |
+| 日期       | 决策                                                           | 理由                                                       | 载体                                  |
+| ---------- | -------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------- |
+| 2026-10-26 | vendoring 只 merge 不 rebase/squash                            | 保留上游 SHA，rerere 可复用判法                            | `scripts/vendor/README.md`、CLAUDE.md |
+| 2026-10-26 | 深改点统一 `// FORK:` 标记，footprint 只减不增                 | 每月可审计，目标是做成扩展点向上游提 PR 后删除             | 全仓库                                |
+| 2026-10-28 | 吸收 PR 质量门禁只审 fork footprint（基线=vendor/upstream 尖） | 上游存量 lint 欠账不该挡住吸收；回归归 main 全量通道       | vendor-ci.yml                         |
+| 2026-10-31 | 品牌名运行时改写，catalog 保持上游原样                         | 吸收零冲突、词表单点维护                                   | §2.1                                  |
+| 2026-10-31 | 保留 `orca:` deep-link scheme                                  | 兼容已有链接/OAuth                                         | §2.3                                  |
+| 2026-11-03 | package.json `name` 不改，安装差异用 NSIS `!undef` 收口        | electron-builder 路径全由 name 推导；改名牵动面太大        | §2.3、§3                              |
+| 2026-11-03 | 安装隔离必须实测路径，不看元数据                               | 静默安装曾覆盖官方 Orca 程序文件                           | §3 验收红线                           |
+| 2026-11-04 | userData/单实例锁固定 `%APPDATA%\Kiln`，旧数据不迁移           | 彻底消除与官方版的锁与数据共用；旧数据可能已与官方版混用   | §3、§8                                |
+| 2026-11-04 | 自建 feed 前禁用一切官方更新查询                               | 官方"更新"会装回 Orca，与 Kiln 冲突                        | §4                                    |
+| 2026-11-04 | 架构/决策必须随 PR 记入本文件（跨机/跨人生效）                 | 决策只存在个人记忆里会随机器丢失                           | 本文件顶部维护规则                    |
+| 2026-11-11 | 自动化编辑器新增独立「模型」字段（回显 + 可改）                | 上游模型只在行内二级菜单、表单不可见；创建前需明确运行环境 | §5.2、AutomationModelField.tsx        |
