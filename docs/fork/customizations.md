@@ -10,7 +10,7 @@
 > 均生效。例行跟随上游的吸收不需要新决策日志，但暴露了新的吸收高风险触点
 > 时要补第 7 节。
 
-最后更新：2026-11-11（吸收上游至 v1.4.256 后）
+最后更新：2026-11-12（吸收上游至 stable v1.4.257 / 尖 `9d286714145` 后）
 
 ## 1. 总览
 
@@ -163,6 +163,21 @@ workflow 自动禁用（只留 vendor-ci/vendor-sync）。
      要把 fork 改动手工并进新 owner 路径（菜单 hook 的
      `onOpenSideConversation`、`chat/use-terminal-pane-chat-projection.ts`
      的菜单 gate）后再删旧文件。
+   - **2026-11-12 吸收至上游尖 `9d286714145`（stable v1.4.257）的两个新触点**：
+     ① pane-manager 再拆 owner，`ManagedPane` 类型从
+     `lib/pane-manager/pane-manager.ts` 移到 `pane-manager-types.ts`，
+     旧模块只 import 不再 re-export；fork 自有文件
+     `terminal-pane-side-conversation.ts` 的 import 不会被自动改，
+     靠完整 `pnpm tc` 才抓到 TS2459（注意 `PaneManager` class 仍在旧模块
+     导出，别一并改）。② 上游 #41274 把
+     `context-menu/TerminalContextMenu.test.tsx` 整体重写为焦点恢复专用
+     （renderToStaticMarkup+mock 收集器 → testing-library 真实渲染，
+     375 行→115 行），侧会话 FORK 用例被整体丢弃：须以上游新版为基底，
+     补回 `canOpenSideConversation`/`onOpenSideConversation` 必填 props，
+     并用新风格重写 fork 侧会话 describe 块（rerere 已记录该 add/add 判法）。
+     另：上游瘦身后 `TerminalPaneSurface.tsx` 回落到 max-lines 档内，
+     旧的 FORK `eslint-disable max-lines` 变成 unused directive，已删除
+     （footprint 减一），这类失效豁免在质量门会直接报红。
 3. **本地验证必须跑完整 `pnpm tc`**（含 renderer 项目），`tc:node` 会漏掉
    渲染侧定制文件的坏 import；随后跑受影响目标测试。
 4. **merge commit 前必须 `git add -A`**：index 快照早于后续修复会造成
