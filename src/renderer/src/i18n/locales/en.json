@@ -18634,6 +18634,12 @@
         },
         "launchSettings": {
           "needsFreshSession": "Agent launch settings require a fresh session for every run."
+        },
+        "AutomationModelField": {
+          "defaultChoice": "Agent default",
+          "label": "Model",
+          "defaultBadge": "default",
+          "pending": "Loading models…"
         }
       },
       "agent": {

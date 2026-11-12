@@ -90,6 +90,7 @@ export function AutomationEditorSettingsSidebar({
               settings={settings}
               surface={surface}
               chatSupported={chatSupported}
+              pickerTriggerClassName={pickerTriggerClassName}
               onDraftChange={onDraftChange}
             />
           </Field>

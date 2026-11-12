@@ -23,6 +23,7 @@ import type { AgentPickerEntry } from '../../../../../shared/agent-launch/picker
 import type { NewTabAgentMenuModel } from '@/components/tab-bar/new-tab-agent-menu-model'
 import { useAutomationAgentPickerEntries } from './use-automation-agent-picker-entries'
 import { AutomationExtraAgentArgsField } from './AutomationExtraAgentArgsField'
+import { AutomationModelField } from './AutomationModelField'
 import { AutomationSurfaceField } from './AutomationSurfaceField'
 import type { AutomationDraft } from './AutomationEditorDialog'
 import {
@@ -50,6 +51,7 @@ export function AutomationAgentLaunchPicker({
   settings,
   surface,
   chatSupported,
+  pickerTriggerClassName,
   onDraftChange
 }: {
   draft: AutomationDraft
@@ -59,6 +61,7 @@ export function AutomationAgentLaunchPicker({
   settings: GlobalSettings | null
   surface: 'chat' | 'terminal'
   chatSupported: boolean | null
+  pickerTriggerClassName?: string
   onDraftChange: (updater: (current: AutomationDraft) => AutomationDraft) => void
 }) {
   const t = useTranslate()
@@ -136,6 +139,22 @@ export function AutomationAgentLaunchPicker({
     modern && menuOpen,
     catalogAgent ?? draft.agentId
   )
+  // Why a second, one-row inventory: the menu only lists live models while it is open, so a field
+  // outside it would fall back to the built-in seed (fable/opus) instead of the host's real list.
+  const fieldModel: NewTabAgentMenuModel = useMemo(
+    () => ({
+      ...model,
+      rows: model.rows.filter((row) => row.agent === draft.agentId)
+    }),
+    [model, draft.agentId]
+  )
+  const fieldObserved = useAgentLaunchPickerInventory(
+    workspace.worktreeId,
+    fieldModel,
+    modern,
+    draft.agentId
+  )
+  const fieldEntry = fieldObserved.find((entry) => entry.agent === draft.agentId)
   const { entries, draftForEntry } = useAutomationAgentPickerEntries(
     observed,
     state,
@@ -168,6 +187,16 @@ export function AutomationAgentLaunchPicker({
         onCatalogOpen={setCatalogAgent}
         onPick={onPick}
       />
+      {modern ? (
+        // FORK: 自动化表单显式展示/选择模型（上游只在行内二级菜单里选）。
+        <AutomationModelField
+          entry={fieldEntry}
+          draft={draft}
+          surface={surface}
+          triggerClassName={pickerTriggerClassName}
+          onDraftChange={onDraftChange}
+        />
+      ) : null}
       {!modern ? (
         <AutomationSurfaceField
           draft={draft}
